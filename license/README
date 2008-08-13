@@ -1,0 +1,22 @@
+Fastgps licensing summary
+13 August 2008
+
+The ideas and behind this receiver come from many sources. The basic concepts of
+GPS receivers are well-explained both in the GPS ICD and in numerous excellent
+technical textbooks. 
+
+Because some parts of the implementation of this receiver were (very) loosely
+derived from other GPL-licensed software receivers, we have chosen to license
+those portions of the receiver under the GPL so as to avoid any confusion. The
+parts of the receiver which we have implemented ourselves without any
+contributions whatsoever from GPL code are licensed under the BSD license. This
+distinction is preserved at the file level, and each file will have either a
+BSD header on it or a GPL header. The full text of the GPL license (v2) is
+copied in the GPL file in this directory. The BSD license is much shorter; it
+is reproduced in its entirety at the top of those files to which it applies.
+
+Note that this mixture of GPL and BSD code means that the resulting executable
+is licensed under the GPL, and that any changes to the GPL-licensed files must
+comply with the terms of the GPL (namely, all changes must be publicly
+distrubted; closed-source, proprietary derivatives are not allowed by the GPL). 
+

@@ -1,0 +1,118 @@
+#
+# Detailed configuration file for the fastgps software receiver
+#
+# Loads processing configuration details, including
+#	Data input file
+#	Sampling and Intermediate frequencies
+#	Satellites to search for, by PRN number
+#	Processing time, seconds
+#	Output setings
+#
+# Formats
+#
+# Input Data File
+#
+# D filename
+#
+# Set Frequencies
+#
+# F a b
+# a = sampling frequency, Hz
+# b = IF centre, Hz
+#
+# Specify Satellite Search
+#
+# S a b ...
+# a = either 99 -> perform cold search for all satellites,
+#     or number of PRN's specified in subsequent list
+# b = If a is not 99, the first PRN to search for
+# c = If a is not 99, the second PRN to search for
+# d ... etc
+#
+# Use Ephemeris File
+#
+# E a
+# a = 1-> use existing fastgps_ephemeris_log.dat
+#
+# Processing Time
+#
+# T a
+# a = processing time, seconds
+#
+# Tracking Loop Gains and Intervals (See Paul Groves book for details)
+#
+# G a b c d e f g h i 
+# a = FLL switch time (ms), default 500
+# b = PLL switch time (ms), default 1000
+# c = PLL pullin time (ms), default 1500
+# d = DLL gain1 Kc0 
+# e = DLL gain2 Kc02 
+# f = FLL gain1 Kca2_FLL1	// applied between a and b 
+# g = FLL gain2 Kca2_FLL2   // applied upto a 
+# h = PLL gain1 Kca2_PLL 
+# i = DLL gain2 Kca3_PLL 
+#
+# Output Data Logging
+#
+# L a b c
+# a = acquisition output flag, 0-> OFF, 1->NORMAL, 2-> NORMAL+DEBUG
+# b = Tracking details output flag, 0-> OFF, 1->NORMAL (every 20ms), 2-> DEBUG (every 1ms)
+# c = Navigation solution output flag, 0-> OFF, 1->NORMAL, 2-> NORMAL+DEBUG, 3->NORMAL+GOOGLE
+#
+# Aiding Information
+#
+# A a b c filename
+# a = acquisition on-off flag, 0-> OFF, 1->ON
+# b = GPS week of aiding file.
+# c = GPS day of week of the aiding file.
+# filename = filename (incl path) of the sp3 data file
+#       notes: data being processing must be taken on same week and day as file if this is to work.
+#              file must also be in 'old' sp3 _a_ format, use conversion utility included if needed.
+#
+# WAAS Differential Corrections, Ionosphere
+#
+# W filename
+#
+#########################################################
+#
+# only lines preceded by a 'hat' are processed, ala LaTeX
+#
+# STG 2008
+#
+
+# datafile location. Change to reflect your data file.
+D ../../data/May15_2008_Guild5.dat
+^D ../../fastgps-initial/data/stanford_quad_16_may_2008_09_10_pdt.dat
+D ../../data/stanford_quad_16_may_2008_09_12_pdt.dat
+
+# Frequencies
+^F 16.3676e6 4.1304e6	# SiGe, sampling frequency, IF
+
+# Satellites
+S 5 2 13 25 27 4   # Guild
+S 99		# cold search
+^S 22
+S 100		# use last acq log file to acquire
+
+# Ephemeris file
+E 1        # use it
+
+# Process Time
+T 5.0		# seconds
+^T 15.0		# seconds
+T 20.0		# seconds
+T 35.0		# seconds
+
+# Data Logging
+^L 1 1 3 	# acq,track,nav(w google) on
+
+# Tracking Loop Gains and Intervals
+G 500 1000 1500 0.004 1.0 0.10 1.15 0.10 0.93 	# default values, Test
+
+# Aiding information
+A 1 1479 4 IGS_data/igu14794_06a.sp3   # Guildford
+^A 1 1479 5 ../../../fastgps-initial/fastgps_ship/IGS_data/igu14795_18.sp3   # sp3c Stanford
+
+# WAAS Differential Corrections, Ionosphere
+W ../../../fastgps-initial/fastgps_ship/waas_data/igp_delays_16_05_2008.txt   # Stanford
+
