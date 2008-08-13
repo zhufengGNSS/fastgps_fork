@@ -81,9 +81,8 @@
 #
 
 # datafile location. Change to reflect your data file.
-D ../../data/May15_2008_Guild5.dat
-^D ../../fastgps-initial/data/stanford_quad_16_may_2008_09_10_pdt.dat
-D ../../data/stanford_quad_16_may_2008_09_12_pdt.dat
+^D data/stanford_quad_16_may_2008_09_10_pdt.dat
+D data/stanford_quad_16_may_2008_09_12_pdt.dat
 
 # Frequencies
 ^F 16.3676e6 4.1304e6	# SiGe, sampling frequency, IF
@@ -111,8 +110,8 @@ G 500 1000 1500 0.004 1.0 0.10 1.15 0.10 0.93 	# default values, Test
 
 # Aiding information
 A 1 1479 4 IGS_data/igu14794_06a.sp3   # Guildford
-^A 1 1479 5 ../../../fastgps-initial/fastgps_ship/IGS_data/igu14795_18.sp3   # sp3c Stanford
+^A 1 1479 5 data/demo_sp3
 
 # WAAS Differential Corrections, Ionosphere
-W ../../../fastgps-initial/fastgps_ship/waas_data/igp_delays_16_05_2008.txt   # Stanford
+W data/demo_igp
 
