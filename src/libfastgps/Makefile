@@ -23,7 +23,7 @@ LIBS = -lm
 
 # flags for Intel Core 2
 CFLAGS   = -g -O2 -march=prescott -msse2 -fomit-frame-pointer -Wall -Werror
-CPPFLAGS = -g -O2 -march=nocona -msse2 -fomit-frame-pointer -Wall -Werror
+CPPFLAGS = -g -O2 -march=prescott -msse2 -fomit-frame-pointer -Wall -Werror
 
 default: .depend $(OUT)
 
