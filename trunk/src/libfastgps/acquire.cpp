@@ -25,10 +25,6 @@ extern "C"
   #include "kiss_fft.h"
   #include "kiss_fftr.h"
 }
-#ifdef GUI
-#include "../wxWidgets/fastgps_wxFrame.h"
-extern fastgps_wxFrame *MainFrame;
-#endif
 
 void fine_acquisition(struct channel *ch);
 

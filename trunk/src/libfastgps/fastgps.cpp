@@ -27,11 +27,6 @@
 #include <time.h>
 #include <float.h>
 
-#ifdef GUI
-#include "../wxWidgets/fastgps_wxFrame.h"
-extern fastgps_wxFrame *MainFrame;
-#endif
-
 //////////////////////////////////////////////////////////////////////////////
 gps_real_t dopplers[NUM_COARSE_DOPPLERS], fine_dopplers[NUM_FINE_DOPPLERS];
 //////////////////////////////////////////////////////////////////////////////
