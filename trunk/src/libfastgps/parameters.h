@@ -69,8 +69,8 @@ typedef unsigned char BYTE;
 #define DEBUG_LOGGING   2
 #define GOOGLE_LOGGING  3
 
-#define MAX_CHANNELS 1
-//#define MAX_CHANNELS 12
+//#define MAX_CHANNELS 1
+#define MAX_CHANNELS 12
 #define MAX_SATELLITES 32
 #define MAX_SATELLITES_TO_TRACK 8
 #define MINIMUM_PVT_SATELLITES 4
