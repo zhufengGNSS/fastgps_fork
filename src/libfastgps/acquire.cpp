@@ -65,9 +65,13 @@ unsigned acq_buffer_full2(unsigned cidx)
   unsigned s; // sample index (saves typing)
   unsigned retval = FAILURE;
   struct channel *ch = &c[cidx];
+  unsigned acq_fft_len = kiss_fft_next_fast_size(system_vars.acq_buf_len);
 
-  for (s = 0; s < system_vars.acq_buf_len; s++)
+  for (s = 0; s < system_vars.acq_buf_len; s++){
     max_shift_energy[s] = 0;
+    sample_buf[s].r = 0;
+    sample_buf[s].i = 0;
+  }
 
   // Doppler loop
   for (ch->acq.doppler_idx = 0; ch->acq.doppler_idx < NUM_COARSE_DOPPLERS; 
@@ -79,37 +83,39 @@ unsigned acq_buffer_full2(unsigned cidx)
     avg_energy = 1;
     max_energy = 0;
 
-		ch->car_phase_inc = 2 * M_PI * 
+	ch->car_phase_inc = 2 * M_PI * 
                         (system_vars.IF + dopplers[ch->acq.doppler_idx]) / 
                         system_vars.sampling_freq;
 
-//          sprintf(msg,"Dopp search freq: %d %f \n", ch->acq.doppler_idx,(dopplers[ch->acq.doppler_idx]));
-//	        XPRINTF(msg);
+    
+    // load I and Q samples into FFT buffer
+	for (s = 0; s < system_vars.acq_buf_len; s++)
+	{
+		char sample = acq_buf[s];
+		nco_sin = GPS_SIN(ch->car_phase);
+		nco_cos = GPS_COS(ch->car_phase);
+		i =  sample * nco_cos;
+		q = -sample * nco_sin;
+		ch->car_phase += ch->car_phase_inc;
+		UNWRAP_ANGLE(ch->car_phase);
+		sample_buf[s].r = i;
+		sample_buf[s].i = q;
+	}
 
-		for (s = 0; s < system_vars.acq_buf_len; s++)
-		{
-			char sample = acq_buf[s];
-			nco_sin = GPS_SIN(ch->car_phase);
-			nco_cos = GPS_COS(ch->car_phase);
-			i =  sample * nco_cos;
-			q = -sample * nco_sin;
-			ch->car_phase += ch->car_phase_inc;
-			UNWRAP_ANGLE(ch->car_phase);
-			sample_buf[s].r = i;
-			sample_buf[s].i = q;
-		}
-
+    // Perform FFT on data and perform multiply with (pre-calculated) PRN code FFT 
     kiss_fft(sample_fft_cfg, sample_buf, sample_fft);
-		for (s = 0; s < system_vars.acq_buf_len; s++)
-		{
-			mult_result[s].r = sample_fft[s].r * code_fft[ch->prn_num-1][s].r -
-                         sample_fft[s].i * code_fft[ch->prn_num-1][s].i;
-			mult_result[s].i = sample_fft[s].r * code_fft[ch->prn_num-1][s].i + 
-                         sample_fft[s].i * code_fft[ch->prn_num-1][s].r;
-		}
+	for (s = 0; s < system_vars.acq_buf_len; s++)
+	{
+		mult_result[s].r = sample_fft[s].r * code_fft[ch->prn_num-1][s].r -
+                        sample_fft[s].i * code_fft[ch->prn_num-1][s].i;
+		mult_result[s].i = sample_fft[s].r * code_fft[ch->prn_num-1][s].i + 
+                        sample_fft[s].i * code_fft[ch->prn_num-1][s].r;
+	}
+
+    // Perform Inverse FFT of frequency domain multiplication
     kiss_fft(inverse_fft_cfg, mult_result, inverse_fft);
 		
-		// search the result
+	// search the IFFT result for signal peaks
     for (s = 0; s < system_vars.acq_buf_len; s++)
     {
       double d;
@@ -122,9 +128,11 @@ unsigned acq_buffer_full2(unsigned cidx)
         {
           max_doppler = dopplers[ch->acq.doppler_idx];
           ch->acq.best_doppler = ch->acq.doppler_idx;
-          max_shift = (s % (system_vars.acq_buf_len / ACQ_MS))   / 
-                      (double)(system_vars.acq_buf_len / ACQ_MS) * 
+
+          max_shift = (s % (acq_fft_len / ACQ_MS))   / 
+                      (double)(acq_fft_len / ACQ_MS) * 
                       (double)(CHIPS_PER_CODE);
+
           max_energy = d;
         }
       }
@@ -134,11 +142,12 @@ unsigned acq_buffer_full2(unsigned cidx)
     avg_energy /= (system_vars.acq_buf_len);
     tempd = max_energy / avg_energy;
 
+    // If the max to avg ration indicates a signal is present
     if(tempd > COARSE_ACQ_THRESH)
     {
       fastgps_printf("coarse acq best doppler: %f\n", max_doppler);
-      // Perform another FFT search at this code delay to narrow the Doppler 
-      // frequency to sufficient accuracy to jump right to phase tracking.
+
+      // Perform fine frequency scan, without FFT's
       fine_acquisition(ch);
 
       // Store results for tracking
@@ -169,6 +178,8 @@ unsigned acq_buffer_full2(unsigned cidx)
     }
   }   // end of Doppler loop
 
+
+  // Debug processing
   if(system_vars.acq_log_flag == DEBUG_LOGGING)
   {
     // Acquisition debug information
@@ -248,8 +259,10 @@ void fine_acquisition(struct channel *ch)
 	unsigned s;
 	double fa_max_energy = 0, fa_energy;
 
-  code = CODE_TABLE[ch->prn_num-1];
+    // retrieve PRN code for this satellite    
+    code = CODE_TABLE[ch->prn_num-1];
 
+    // Loop through fine Doppler bins at signal code delay (max_shift)
 	for (ch->acq.fine_doppler_idx = 0; 
        ch->acq.fine_doppler_idx < NUM_FINE_DOPPLERS; 
        ch->acq.fine_doppler_idx++)
@@ -263,6 +276,7 @@ void fine_acquisition(struct channel *ch)
 		ch->code_prompt = CHIPS_PER_CODE - max_shift + 1;
 		ch->ip = ch->qp = 0;
 
+        // Perform correlation at this code and freq       
 		for (s = 0; s < system_vars.acq_buf_len; s++)
 		{
 			char sample = acq_buf[s];
@@ -278,17 +292,27 @@ void fine_acquisition(struct channel *ch)
 			if (ch->code_prompt > CHIPS_PER_CODE + 1)
 				ch->code_prompt -= CHIPS_PER_CODE;
 		}
+
+        // calculate max energy
 		fa_energy = ch->ip*ch->ip + ch->qp*ch->qp;
+
+        // keep the best value
 		if (fa_energy > fa_max_energy)
 		{
 			fa_max_energy = fa_energy;
 			ch->acq.best_fine_doppler = ch->acq.fine_doppler_idx;
 		}
+
 	}
 
+    // store best value for tracking loops
 	ch->doppler = dopplers[ch->acq.best_doppler] + 
                 fine_dopplers[ch->acq.best_fine_doppler];
 }
+
+// **********************************************************************
+//  KissFFT initialization routine
+// **********************************************************************
 
 void init_fft_acq()
 {
@@ -354,6 +378,10 @@ void init_fft_acq()
   free(sampled_code);
 }
 
+// **********************************************************************
+//  KissFFT clean up
+// **********************************************************************
+
 void shutdown_fft_acq()
 {
   for (BYTE sv = 0; sv < 32; sv++)
@@ -367,6 +395,10 @@ void shutdown_fft_acq()
   free(inverse_fft);
   kiss_fft_cleanup();
 }
+
+// **********************************************************************
+//  Read in existing acquisition file and assign values to tracking variables
+// **********************************************************************
 
 int read_acquisiton_file()
 {
