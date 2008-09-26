@@ -33,7 +33,7 @@
 
 #include <stdio.h>
 #include <math.h>
-typedef unsigned char BYTE;
+#include "types.h"
 
 #define NAV_OMEGAE_DOT	7.2921151467e-005
 #define NAV_C						299792458
@@ -101,10 +101,6 @@ typedef unsigned char BYTE;
 #define GPS_COS(x) (x > M_PI/2 || x < -M_PI/2 ? -1 : 1)
 #define UNWRAP_ANGLE(x) { if (x > M_PI) x -= 2 * M_PI; else if (x < -M_PI) x += 2 * M_PI; }
 
-// using 'float' here seems to not speed things up and introduces enough
-// numerical errors that navigation decoding often doesn't work (among 
-// other things)
-typedef double gps_real_t;
 #define MAKE_LOGS
 
 // These gains calculated "roughly" using the formulas provided in Paul Groves, Artech book

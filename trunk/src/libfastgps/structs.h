@@ -37,7 +37,7 @@ struct tracking_coeffs_t
 {
 	gps_real_t pll_kp, pll_ki;
 	gps_real_t dll_kp, dll_ki;
-	BYTE pll_int_time, dll_int_time, disc_type;
+	uint8_t pll_int_time, dll_int_time, disc_type;
 };
 
 struct tracking_info_t
@@ -62,9 +62,9 @@ struct tracking_info_t
 struct nav_info_t
 {
 	char subframe[SUBFRAME_LENGTH];
-	BYTE payload[PAYLOAD_LENGTH];
+	uint8_t payload[PAYLOAD_LENGTH];
 	unsigned subframe_write_pos, preamb_cand[MAX_PREAMBLE_CANDIDATES];
-	BYTE subframe_state, num_preamb_cand, first_subframe_flag;
+	uint8_t subframe_state, num_preamb_cand, first_subframe_flag;
 	char parity;
 	char preamb_cor[MAX_PREAMBLE_CANDIDATES];
 	unsigned tow, week_num;
@@ -73,22 +73,22 @@ struct nav_info_t
 	gps_real_t af0, af1, af2;
 	unsigned toe, toc;
 	double tgd;
-	BYTE subframe_valid[6], subframe_start_valid;
+	uint8_t subframe_valid[6], subframe_start_valid;
 	unsigned subframe_start_clock;
 	double sat_pos[3], clock_corr, sat_vel[3],clock_drift, pseudorange, old_pseudorange;
 	unsigned pseudorange_valid, pseudorange_count;
 	unsigned valid_for_pvt;
 	double recv_pos[4];
 	double bit_time,tx_time;
-        BYTE nav_data_state;
+  uint8_t nav_data_state;
 	double doppler_meas;
 };
 
 struct acq_info_t
 {
-	BYTE state;
-	BYTE doppler_idx, best_doppler;
-	BYTE fine_doppler_idx, best_fine_doppler;
+	uint8_t state;
+	uint8_t doppler_idx, best_doppler;
+	uint8_t fine_doppler_idx, best_fine_doppler;
 	unsigned short block_ms, block_ctr;
 	gps_real_t energy, max_energy;
 	gps_real_t ratio;
@@ -98,7 +98,7 @@ struct acq_info_t
 
 struct channel
 {
-	BYTE prn_num;
+	uint8_t prn_num;
 	unsigned sample_idx;
 	int ie, qe, ip, qp, il, ql, ire, qre, irl, qrl;
 	int ip_save, qp_save;
@@ -106,7 +106,7 @@ struct channel
 	gps_real_t car_phase, car_phase_inc, true_car_phase_inc;
 	gps_real_t code_prompt, code_inc, true_code_inc; // code phase E,L are generated from this on-the-fly
 	gps_real_t non_coh_disc, non_coh_disc_integ, doppler;
-	BYTE state;
+	uint8_t state;
 	unsigned num_ms, state_ms, dll_ctr;
 	unsigned clock, prev_integration_time;
 	int tracking_lock;
@@ -166,7 +166,7 @@ struct s_system_vars
         unsigned int prn_search_list[MAX_SATELLITES];
         unsigned int num_search_svs;
         unsigned int num_channels;
-        unsigned long long sats_found;        // 64 bit map
+        uint64_t sats_found;
         unsigned int prn_to_channel_map[MAX_SATELLITES];
         unsigned file_acquisition;
         unsigned acq_file_start_count;

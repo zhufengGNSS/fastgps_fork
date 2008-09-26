@@ -31,6 +31,8 @@
 #ifndef FUNCS_H
 #define FUNCS_H
 
+#include "types.h"
+
 int run_fastgps();
 
 // config and logging
@@ -40,7 +42,7 @@ void update_tracking_log();
 void update_nav_log();
 
 // correlator channel
-void init_correlator_channel(BYTE idx);
+void init_correlator_channel(uint8_t idx);
 void set_state(struct channel *x, int state);
 void software_correlator(struct channel *ch, char *samples, unsigned samples_len);
 

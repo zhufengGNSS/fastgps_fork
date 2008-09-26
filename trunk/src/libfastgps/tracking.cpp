@@ -29,6 +29,7 @@
 */
 
 #include "fastgps.h"
+#include "types.h"
 
 ///////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////
@@ -67,7 +68,7 @@ void tracking_update(struct channel *x)
 
         // mark the nav bit start ms from among the 20 possibilities (i.e. 20ms per L1 C/A code navigation data bit)
         // this is important for tracking the signal transmission time and making pseudorange measurements
-		BYTE i, max_nav_idx = 0;
+		uint8_t i, max_nav_idx = 0;
 		gps_real_t max_nav = 0;
 		for (i = 0; i < MS_PER_NAV_BIT; i++)
 			if (x->track.nav_deriv[i] > max_nav)

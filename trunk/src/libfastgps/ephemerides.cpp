@@ -48,8 +48,8 @@ union onebyte_t
 void process_subframe(struct channel *x)
 {
 
-  BYTE *data = x->nav.payload;
-  BYTE subframe_id = (data[5] & 0x1C) >> 2;  // extract subframe id 
+  uint8_t *data = x->nav.payload;
+  uint8_t subframe_id = (data[5] & 0x1C) >> 2;  // extract subframe id 
   // every subframe contains a TOW, 
   // at this point a psuedorange measurment can be taken
   x->nav.tow = ((data[3] << 9) | (data[4] << 1) | ((data[5] & 0x80) >> 7)) * 6;
@@ -206,7 +206,7 @@ void process_nav_bit(struct channel *x, char bit)
       // when we have enough bits for a complete subframe,
       if (x->nav.subframe_write_pos == SUBFRAME_LENGTH - 1)
       {
-        BYTE pc_idx;
+        uint8_t pc_idx;
         x->nav.subframe_state = SF_VERIFYING;
         fastgps_printf("searching preamble candidates...\n");
         // reset the preamble verification correlation accumulators
@@ -218,7 +218,7 @@ void process_nav_bit(struct channel *x, char bit)
     case SF_VERIFYING:
     {
       short sf_idx;
-      BYTE pc_idx;
+      uint8_t pc_idx;
 
       // check all the preamble canditates in this 300 bits of data
       for (pc_idx = 0; pc_idx < x->nav.num_preamb_cand; pc_idx++)
@@ -372,7 +372,7 @@ void process_nav_bit(struct channel *x, char bit)
 * ************************************************************************** */
 char nav_parity(char *ndat)
 {
-  BYTE i;
+  uint8_t i;
   char parity[6];
   // check if the data bits must be inverted
   for (i=2; i<24+2; ++i)
@@ -461,7 +461,7 @@ int read_ephemeris_file()
   unsigned found_channel = 0;
   double process_time;
   double eph_time;
-  BYTE temp_prn;
+  uint8_t temp_prn;
 
   /* Open configuration file */
   infile = fopen("fastgps_ephemeris_log.dat","r");
@@ -497,7 +497,7 @@ int read_ephemeris_file()
           }
 
           fscanf(infile," %d",&testi);    // prn_num
-          temp_prn = (BYTE) testi;
+          temp_prn = (uint8_t) testi;
           fscanf(infile," %d",&testi);    // subframe_valid[0]
           fscanf(infile," %d",&testi);    // subframe_valid[1]
           fscanf(infile," %d",&testi);    // subframe_valid[2]

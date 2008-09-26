@@ -98,7 +98,7 @@ void software_correlator(struct channel *ch, char *samples,
 	}
 }
 
-void init_correlator_channel(BYTE idx)
+void init_correlator_channel(uint8_t idx)
 {
 	struct channel *x = &c[idx];
 	x->car_phase = 0;
@@ -125,7 +125,7 @@ void set_state(struct channel *x, int state)
 {
 	if (state == CH_STATE_ACQUIRE)
 	{
-		BYTE ch_idx;
+		uint8_t ch_idx;
 
 		for (ch_idx = 0; ch_idx < MAX_CHANNELS; ch_idx++)
 			if (&c[ch_idx] == x)
