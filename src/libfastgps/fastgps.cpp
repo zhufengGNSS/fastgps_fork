@@ -586,7 +586,7 @@ void update_acq_log()
     {
       for (int sv = 1; sv <= MAX_SATELLITES; sv++)
       {
-        unsigned long long tempul64 = (1 << sv);
+        uint64_t tempul64 = (1 << sv);
         if(tempul64 & system_vars.sats_found)
         {
           unsigned tempchan = system_vars.prn_to_channel_map[sv];

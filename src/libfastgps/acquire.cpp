@@ -317,7 +317,7 @@ void fine_acquisition(struct channel *ch)
 void init_fft_acq()
 {
 	// sample the C/A code for all satellites
-	BYTE sv_num, ch_idx;
+	uint8_t sv_num, ch_idx;
 	gps_real_t code_time, code_time_inc;
 	unsigned s, shift_init;
   kiss_fft_scalar *sampled_code;
@@ -342,7 +342,7 @@ void init_fft_acq()
 		code_time = 0;
 		for (s = 0; s < system_vars.acq_buf_len / ACQ_MS; s++)
 		{
-			BYTE ms_counter;
+			uint8_t ms_counter;
 			code_time += code_time_inc;
 			for (ms_counter = 0; ms_counter < ACQ_MS; ms_counter++)
 				sampled_code[s + ms_counter * system_vars.acq_buf_len / ACQ_MS] =
@@ -384,7 +384,7 @@ void init_fft_acq()
 
 void shutdown_fft_acq()
 {
-  for (BYTE sv = 0; sv < 32; sv++)
+  for (uint8_t sv = 0; sv < 32; sv++)
     free(code_fft[sv]);
   kiss_fft_free(sample_fft_cfg);
   kiss_fft_free(inverse_fft_cfg);
