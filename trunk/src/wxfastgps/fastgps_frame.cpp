@@ -95,13 +95,12 @@ void fastgps_printf(const char *format, ...)
 {
   va_list args;
   va_start(args, format);
-//  char msgbuf[65535]; // that's one long printf
   char msgbuf[200]; 
-  vsprintf(msgbuf, format, args);
+  vsnprintf(msgbuf, sizeof(msgbuf), format, args);
   va_end(args);
   wxString wx_str(msgbuf, wxConvUTF8);
   g_main_frame->log_box->WriteText(wx_str); 
   wxYieldIfNeeded();
-  fprintf(g_message_log, msg); // log message to file
+  fputs(msgbuf, g_message_log); // log message to file
 }
 
