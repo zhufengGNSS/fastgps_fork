@@ -1,0 +1,31 @@
+<?xml version="1.0" ?>
+<!-- $Id: fastgps_windows.bkl 31612 2005-01-27 22:47:37Z VS $ -->
+
+<makefile>
+
+    <exe id="fastgps">
+        
+        <sources>
+            ../src/fastgps/main.cpp
+            ../src/libfastgps/fastgps.cpp
+            ../src/libfastgps/code_table.cpp
+            ../src/libfastgps/acquire.cpp
+            ../src/libfastgps/correlator.cpp
+            ../src/libfastgps/tracking.cpp
+            ../src/libfastgps/nav.cpp
+            ../src/libfastgps/lin_alg.cpp
+            ../src/libfastgps/ephemerides.cpp
+            ../src/libfastgps/datetime.cpp
+            ../src/libfastgps/intrpsp3c.cpp
+            ../src/libfastgps/gnss_utils.cpp
+            ../src/libfastgps/kiss_fft.c
+            ../src/libfastgps/kiss_fftr.c
+        </sources>
+
+        <include>../src/libfastgps</include>
+
+        <app-type>console</app-type>
+        
+    </exe>
+
+</makefile>
