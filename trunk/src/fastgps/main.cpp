@@ -29,6 +29,7 @@
 */
 
 #include "fastgps.h"
+#include <stdarg.h>
 
 // this implementation just dumps the message to the console
 void fastgps_printf(const char *format, ...)

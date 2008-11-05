@@ -40,6 +40,7 @@ enum
   ID_About,
   ID_FASTGPS_START_BUTTON,
   ID_FASTGPS_LOG_BOX,
+  ID_PANEL1,
 };
 
 BEGIN_EVENT_TABLE(FastGpsFrame, wxFrame)
@@ -53,12 +54,7 @@ FastGpsFrame::FastGpsFrame(const wxString& title, const wxPoint& pos,
 : wxFrame((wxFrame *)NULL, -1, title, pos, size)
 {
   g_main_frame = this;
-	wxBoxSizer *topsizer = new wxBoxSizer(wxHORIZONTAL);
-	wxBoxSizer *vertsizer = new wxBoxSizer(wxVERTICAL);
-	wxStaticText *text = new wxStaticText(this, -1, _T("fastgps"));
-	topsizer->Add(vertsizer, 1, wxALIGN_CENTER | wxALL, 10);
-	vertsizer->Add(text, 1, wxALIGN_CENTER | wxALL, 10);
-	SetSizer(topsizer);
+
   wxMenu *menuFile = new wxMenu;
   menuFile->Append( ID_About, _T("&About...") );
   menuFile->AppendSeparator();
@@ -68,12 +64,13 @@ FastGpsFrame::FastGpsFrame(const wxString& title, const wxPoint& pos,
   SetMenuBar( menuBar );
   CreateStatusBar();
   SetStatusText( _T("Welcome to the fastgps software receiver!") );  
-  //     Button1 = new wxButton(this, ID_BUTTON1, _T("Start"), wxPoint(240,232), wxDefaultSize, 0, wxDefaultValidator, _T("ID_BUTTON1"));
-  start_button = new wxButton(this, ID_FASTGPS_START_BUTTON, _T("Start"), 
-                              wxPoint(40,125));
-  log_box = new wxTextCtrl(this, ID_FASTGPS_LOG_BOX, wxEmptyString, 
-                           wxPoint(140,24), wxSize(456,292), wxTE_MULTILINE, 
-                           wxDefaultValidator, _T("ID_FASTGPS_LOG_BOX"));
+
+  // place the controls on a Panel
+  wxPanel *Panel1 = new wxPanel(this, ID_PANEL1, wxDefaultPosition, wxDefaultSize, wxTAB_TRAVERSAL, _T("ID_PANEL1"));
+
+  start_button = new wxButton(Panel1, ID_FASTGPS_START_BUTTON, _("Start"), wxPoint(220,250), wxDefaultSize, 0, wxDefaultValidator, _T("ID_FASTGPS_START_BUTTON"));
+  log_box = new wxTextCtrl(Panel1, ID_FASTGPS_LOG_BOX, wxEmptyString, wxPoint(25,25), wxSize(500,200), wxTE_MULTILINE, wxDefaultValidator, _T("ID_FASTGPS_LOG_BOX"));
+
 }
  
 void FastGpsFrame::OnQuit(wxCommandEvent& WXUNUSED(event))
@@ -89,25 +86,17 @@ void FastGpsFrame::OnAbout(wxCommandEvent& WXUNUSED(event))
 
 void FastGpsFrame::startButtonClick(wxCommandEvent& WXUNUSED(event))
 {
-  log_box->WriteText(_T("fastgps stating"));
+  log_box->WriteText(_T("fastgps starting"));
   g_message_log = fopen("fastgps_messages.txt","w");
   run_fastgps();
   fclose(g_message_log);
 }
-/*
-void FastGpsFrame::AddMessage(char *msg)
-{
-  wxString bbb(msg, wxConvUTF8);
-  log_box->WriteText(bbb);  // make sure  wxTextCtrl is set to MULTILINE=true (expand EditStyle)
-  wxYieldIfNeeded();
-  fprintf(message_log, msg); // log message to file
-}
-*/
 void fastgps_printf(const char *format, ...)
 {
   va_list args;
   va_start(args, format);
-  char msgbuf[65535]; // that's one long printf
+//  char msgbuf[65535]; // that's one long printf
+  char msgbuf[200]; 
   vsprintf(msgbuf, format, args);
   va_end(args);
   wxString wx_str(msgbuf, wxConvUTF8);

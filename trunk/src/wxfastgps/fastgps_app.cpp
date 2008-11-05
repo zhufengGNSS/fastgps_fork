@@ -42,7 +42,7 @@ IMPLEMENT_APP(FastGpsApp);
 bool FastGpsApp::OnInit()
 {
   FastGpsFrame *frame = new FastGpsFrame(_T("fastgps software reciever"), 
-                                         wxPoint(50,50), wxSize(650,400) );
+                                         wxPoint(50,50), wxSize(550,350) );
   frame->Show();
   SetTopWindow(frame);  
   return true;

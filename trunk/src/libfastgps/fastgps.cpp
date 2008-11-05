@@ -60,7 +60,8 @@ int run_fastgps()
 
   if (retval != OK)
   {
-    fastgps_printf("ahhhh couldn't open config file. Check that "
+
+    fastgps_printf("ahhhh couldn't open config file.\nCheck that "
                    "fastgps_config.txt is in executable directory.\n");
     return -1;
   }
@@ -85,7 +86,7 @@ int run_fastgps()
 
   if (!data_file)
   {
-    fastgps_printf("ahhhh couldn't open data file. Check that path to data "
+    fastgps_printf("ahhhh couldn't open data file.\nCheck that path to data "
                    "file in fastgps_config.txt is correct.\n");
     return -1;
   }
@@ -430,7 +431,8 @@ int read_config_file()
   if (!system_vars.config_file)
   {
     printf("Couldn't open configuration file 'fastgps_config.txt'.\n");
-    exit(1);
+//    exit(1);
+    return -1;
   }
   rewind(system_vars.config_file);  // make sure we are at the beginning
   /* Read in info from file */
