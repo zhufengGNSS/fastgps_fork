@@ -487,11 +487,11 @@ int ReadWAASFile(double phi_pp_deg,double lambda_pp_deg,double *IGP_points)
     while(!feof(system_vars.waas_igp_file))
     {
       // read in longitude, deg
-      fscanf(system_vars.waas_igp_file," %lf",&temp_lon);
+      VERIFY_IO(fscanf(system_vars.waas_igp_file," %lf",&temp_lon), 1);
       // read in latitude, deg
-      fscanf(system_vars.waas_igp_file," %lf",&temp_lat);
+      VERIFY_IO(fscanf(system_vars.waas_igp_file," %lf",&temp_lat), 1);
       // read in delay, meters
-      fscanf(system_vars.waas_igp_file," %lf",&temp_delay);
+      VERIFY_IO(fscanf(system_vars.waas_igp_file," %lf",&temp_delay), 1);
       // is this point within 5 deg of IPP longitude (lambda)
       tempd = fabs(lambda_pp_deg - temp_lon); 
       if(tempd < 5.0)

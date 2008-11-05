@@ -44,6 +44,8 @@
 #include "datetime.h"
 #include "intrpsp3c.h"
 
+#define VERIFY_IO(STMT, VAL) { if ((STMT)!= (VAL)) return 0; }
+
 // this function is implemented differently in the CLI and GUI versions
 void fastgps_printf(const char *format, ...);
 
