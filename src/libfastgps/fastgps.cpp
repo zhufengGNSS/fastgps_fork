@@ -415,7 +415,6 @@ int run_fastgps()
   return 0;
 }
 
-#define VERIFY_IO(STMT, VAL) { if ((STMT)!= (VAL)) return 0; }
 
 int read_config_file()
 {

@@ -474,16 +474,16 @@ int read_ephemeris_file()
   {
     while (!feof(infile))  /* until end of file */
     {
-      fread(&tempc,1,1,infile);
+      VERIFY_IO(fread(&tempc,1,1,infile), 1);
       if(tempc == '/')
       {
-        fread(&tempc,1,1,infile);
+        VERIFY_IO(fread(&tempc,1,1,infile), 1);
         if(tempc == 'E')
         {
           /* Read SV info entry */
-          fscanf(infile," %lf",&testd);   // rcvr_time when ephemeris logged
+          VERIFY_IO(fscanf(infile," %lf",&testd), 1); // rcvr_tm of ephemeris 
           eph_time = testd;
-          fscanf(infile," %lf",&testd);   // process time since start of data
+          VERIFY_IO(fscanf(infile," %lf",&testd), 1); // process tm since start
           process_time = testd;
           // TODO try setting the rcvr clock
           //			if(!system_vars.recv_time_valid){
@@ -496,11 +496,11 @@ int read_ephemeris_file()
                            system_vars.recv_time);
           }
 
-          fscanf(infile," %d",&testi);    // prn_num
+          VERIFY_IO(fscanf(infile," %d",&testi), 1);    // prn_num
           temp_prn = (uint8_t) testi;
-          fscanf(infile," %d",&testi);    // subframe_valid[0]
-          fscanf(infile," %d",&testi);    // subframe_valid[1]
-          fscanf(infile," %d",&testi);    // subframe_valid[2]
+          VERIFY_IO(fscanf(infile," %d",&testi), 1);    // subframe_valid[0]
+          VERIFY_IO(fscanf(infile," %d",&testi), 1);    // subframe_valid[1]
+          VERIFY_IO(fscanf(infile," %d",&testi), 1);    // subframe_valid[2]
 
           // find channel assigned to this prn
           found_channel = 0;
@@ -516,55 +516,55 @@ int read_ephemeris_file()
           if(found_channel)
           {
             // subframe 1
-            fscanf(infile," %d",&testi);
+            VERIFY_IO(fscanf(infile," %d",&testi), 1);
             c[tempchan].nav.week_num = testi;
-            fscanf(infile," %lf",&testd);
+            VERIFY_IO(fscanf(infile," %lf",&testd), 1);
             c[tempchan].nav.tgd = testd;
-            fscanf(infile," %d",&testi);
+            VERIFY_IO(fscanf(infile," %d",&testi), 1);
             c[tempchan].nav.toc = testi;
-            fscanf(infile," %lf",&testd);
+            VERIFY_IO(fscanf(infile," %lf",&testd), 1);
             c[tempchan].nav.af2 = testd;
-            fscanf(infile," %lf",&testd);
+            VERIFY_IO(fscanf(infile," %lf",&testd), 1);
             c[tempchan].nav.af1 = testd;
-            fscanf(infile," %lf",&testd);
+            VERIFY_IO(fscanf(infile," %lf",&testd), 1);
             c[tempchan].nav.af0 = testd;
             c[tempchan].nav.subframe_valid[1] = 1;
 
             // subframe 2
-            fscanf(infile," %lf",&testd);
+            VERIFY_IO(fscanf(infile," %lf",&testd), 1);
             c[tempchan].nav.crs = testd;
-            fscanf(infile," %lf",&testd);
+            VERIFY_IO(fscanf(infile," %lf",&testd), 1);
             c[tempchan].nav.dn = testd;
-            fscanf(infile," %lf",&testd);
+            VERIFY_IO(fscanf(infile," %lf",&testd), 1);
             c[tempchan].nav.m0 = testd;
-            fscanf(infile," %lf",&testd);
+            VERIFY_IO(fscanf(infile," %lf",&testd), 1);
             c[tempchan].nav.cuc = testd;
-            fscanf(infile," %lf",&testd);
+            VERIFY_IO(fscanf(infile," %lf",&testd), 1);
             c[tempchan].nav.ecc = testd;
-            fscanf(infile," %lf",&testd);
+            VERIFY_IO(fscanf(infile," %lf",&testd), 1);
             c[tempchan].nav.cus = testd;
-            fscanf(infile," %lf",&testd);
+            VERIFY_IO(fscanf(infile," %lf",&testd), 1);
             c[tempchan].nav.sqrta = testd;
-            fscanf(infile," %d",&testi);
+            VERIFY_IO(fscanf(infile," %d",&testi), 1);
             c[tempchan].nav.toe = testi;
             c[tempchan].nav.subframe_valid[2] = 1;
 
             // subframe 3
-            fscanf(infile," %lf",&testd);
+            VERIFY_IO(fscanf(infile," %lf",&testd), 1);
             c[tempchan].nav.cic = testd;
-            fscanf(infile," %lf",&testd);
+            VERIFY_IO(fscanf(infile," %lf",&testd), 1);
             c[tempchan].nav.omega0 = testd;
-            fscanf(infile," %lf",&testd);
+            VERIFY_IO(fscanf(infile," %lf",&testd), 1);
             c[tempchan].nav.cis = testd;
-            fscanf(infile," %lf",&testd);
+            VERIFY_IO(fscanf(infile," %lf",&testd), 1);
             c[tempchan].nav.inc = testd;
-            fscanf(infile," %lf",&testd);
+            VERIFY_IO(fscanf(infile," %lf",&testd), 1);
             c[tempchan].nav.crc = testd;
-            fscanf(infile," %lf",&testd);
+            VERIFY_IO(fscanf(infile," %lf",&testd), 1);
             c[tempchan].nav.w = testd;
-            fscanf(infile," %lf",&testd);
+            VERIFY_IO(fscanf(infile," %lf",&testd), 1);
             c[tempchan].nav.omegadot = testd;
-            fscanf(infile," %lf",&testd);
+            VERIFY_IO(fscanf(infile," %lf",&testd), 1);
             c[tempchan].nav.inc_dot = testd;
             c[tempchan].nav.subframe_valid[3] = 1;
 

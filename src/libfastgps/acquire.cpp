@@ -425,40 +425,40 @@ int read_acquisiton_file()
   {
   	while (!feof(infile))  /* until end of file */
   	{
-  		fread(&tempc,1,1,infile);
+  		VERIFY_IO(fread(&tempc,1,1,infile), 1);
   		if(tempc == '/')
       {
-  	  	fread(&tempc,1,1,infile);
+  	  	VERIFY_IO(fread(&tempc,1,1,infile), 1);
         if(tempc == 'A')
         {
           /* Read SV info entry */
-          fscanf(infile," %lf",&testd);   // process time
-          fscanf(infile," %d",&testi);
+          VERIFY_IO(fscanf(infile," %lf",&testd), 1);   // process time
+          VERIFY_IO(fscanf(infile," %d",&testi), 1);
           system_vars.acq_file_start_count = (unsigned) testi;
-          fscanf(infile," %d",&testi);  // sv
-          fscanf(infile," %d",&testi);  // chan
+          VERIFY_IO(fscanf(infile," %d",&testi), 1);  // sv
+          VERIFY_IO(fscanf(infile," %d",&testi), 1);  // chan
           tempchan = (unsigned) testi;
           init_correlator_channel(tempchan);
-          fscanf(infile," %d",&testi);  // sv again, actual one assigned
+          VERIFY_IO(fscanf(infile," %d",&testi), 1);  // sv actual one assigned
           c[tempchan].prn_num = testi;
-          fscanf(infile," %lf",&testd);  // max energy
-          fscanf(infile," %lf",&testd);   // acq ratio
-          fscanf(infile," %lf",&testd);   // Doppler
+          VERIFY_IO(fscanf(infile," %lf",&testd), 1);  // max energy
+          VERIFY_IO(fscanf(infile," %lf",&testd), 1);   // acq ratio
+          VERIFY_IO(fscanf(infile," %lf",&testd), 1);   // Doppler
           // the whole enchilada (for now)
-          fscanf(infile," %lf",&testd);
+          VERIFY_IO(fscanf(infile," %lf",&testd), 1);
           c[tempchan].true_car_phase_inc = testd;
-          fscanf(infile," %lf",&testd);
+          VERIFY_IO(fscanf(infile," %lf",&testd), 1);
           c[tempchan].true_code_inc = testd;
-          fscanf(infile," %lf",&testd);
+          VERIFY_IO(fscanf(infile," %lf",&testd), 1);
           c[tempchan].track.carrier_freq = testd;
           c[tempchan].track.carrier_freq_acq = testd;
-          fscanf(infile," %lf",&testd);
+          VERIFY_IO(fscanf(infile," %lf",&testd), 1);
           c[tempchan].track.code_freq = testd;
-          fscanf(infile," %lf",&testd);
+          VERIFY_IO(fscanf(infile," %lf",&testd), 1);
           c[tempchan].doppler = testd;
-          fscanf(infile," %lf",&testd);
+          VERIFY_IO(fscanf(infile," %lf",&testd), 1);
           c[tempchan].code_prompt = testd;
-          fscanf(infile," %lf",&testd);
+          VERIFY_IO(fscanf(infile," %lf",&testd), 1);
           c[tempchan].acq.acq_finish_time = testd;
           c[tempchan].state = CH_STATE_POSTACQ_SPIN;
           fastgps_printf("Allocating PRN %d to channel %d\n",
