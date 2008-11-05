@@ -12,7 +12,7 @@ default: $(OUT)
 
 .cpp.o:
 	$(CCC) $(CPPFLAGS) -c $< -o $@
-$(OUT): $(OBJ)
+$(OUT): $(OBJ) ../libfastgps/libfastgps.a
 	$(CCC) $(OBJ) $(LIBS) -o $(OUT)
 clean:
 	-rm $(OUT) *.o

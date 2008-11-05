@@ -10,7 +10,7 @@ CPPFLAGS = -Wall -Werror -g -O2 -march=prescott -msse2 -fomit-frame-pointer $(IN
 
 default: .depend $(OUT)
 
-$(OUT): $(OBJ) $(COBJ)
+$(OUT): $(OBJ) $(COBJ) ../libfastgps/libfastgps.a
 	$(CCC) $(OBJ) $(LIBS) -o $(OUT)
 .cpp.o:
 	$(CCC) $(CPPFLAGS) -c $< -o $@
