@@ -61,7 +61,7 @@ int run_fastgps()
   if (retval != OK)
   {
 
-    fastgps_printf("ahhhh couldn't open config file.\nCheck that "
+    fastgps_printf("ahhhh couldn't read config file.\nCheck that "
                    "fastgps_config.txt is in executable directory.\n");
     return -1;
   }
@@ -415,7 +415,6 @@ int run_fastgps()
   return 0;
 }
 
-
 int read_config_file()
 {
   int retval = OK;
@@ -432,68 +431,66 @@ int read_config_file()
   if (!system_vars.config_file)
   {
     printf("Couldn't open configuration file 'fastgps_config.txt'.\n");
-//    exit(1);
-    return -1;
+    exit(1);
   }
   rewind(system_vars.config_file);  // make sure we are at the beginning
   /* Read in info from file */
   if(!system_vars.config_file) 
   {
+    retval = 0;
     fastgps_printf("couldn't open config file.\n");
-    return 0;
+    return retval;
   }
   else
   {
   	while(!feof(system_vars.config_file))  /* until end of file */
     {
-      VERIFY_IO(fread(&tempc,1,1,system_vars.config_file), 1);
+      fread(&tempc,1,1,system_vars.config_file);
       if(tempc == '^')
       {
-        VERIFY_IO(fread(&tempc,1,1,system_vars.config_file), 1);
+        fread(&tempc,1,1,system_vars.config_file);
         if(tempc == 'A')
         {
           /* Aiding information */
-          VERIFY_IO(fscanf(system_vars.config_file," %d",&testi), 1);
+          fscanf(system_vars.config_file," %d",&testi);
           system_vars.pvt_aiding_flag = testi;
-          VERIFY_IO(fscanf(system_vars.config_file," %d",&testi), 1);
+          fscanf(system_vars.config_file," %d",&testi);
           system_vars.datafile_week = testi;
-          VERIFY_IO(fscanf(system_vars.config_file," %d",&testi), 1);
+          fscanf(system_vars.config_file," %d",&testi);
           system_vars.datafile_day = testi;
           /* IGS Data File */
-          VERIFY_IO(fscanf(system_vars.config_file, " %200s",
-                           system_vars.IGSfilename), 1);
+          fscanf(system_vars.config_file," %s",system_vars.IGSfilename);
         }  // end if 'A'
         if(tempc == 'D') // data file
-          VERIFY_IO(fscanf(system_vars.config_file," %200s",
-                           system_vars.infilename), 1);
+          fscanf(system_vars.config_file," %s",system_vars.infilename);
         if(tempc == 'E') // file ephemeris flag
         {
-          VERIFY_IO(fscanf(system_vars.config_file," %d",&testi), 1);
+          fscanf(system_vars.config_file," %d",&testi);
           system_vars.file_ephemeris = testi;
         }
         if(tempc == 'F')
         {
-          VERIFY_IO(fscanf(system_vars.config_file," %lf",&testd), 1);
+          fscanf(system_vars.config_file," %lf",&testd);
           system_vars.sampling_freq = testd;
           // other variables dependant on sampling_freq
           system_vars.sample_period = (1.0 / system_vars.sampling_freq);
           system_vars.acq_buf_len = ((int)(ACQ_MS * system_vars.sampling_freq /
                                            1000));
-          VERIFY_IO(fscanf(system_vars.config_file," %lf",&testd), 1);
+          fscanf(system_vars.config_file," %lf",&testd);
           system_vars.IF = testd;
         }  // end if 'F'
         if(tempc == 'L') // logging flags
         {
-          VERIFY_IO(fscanf(system_vars.config_file," %d",&testi), 1);
+          fscanf(system_vars.config_file," %d",&testi);
           system_vars.acq_log_flag = testi;
-          VERIFY_IO(fscanf(system_vars.config_file," %d",&testi), 1);
+          fscanf(system_vars.config_file," %d",&testi);
           system_vars.tracking_log_flag = testi;
-          VERIFY_IO(fscanf(system_vars.config_file," %d",&testi), 1);
+          fscanf(system_vars.config_file," %d",&testi);
           system_vars.nav_log_flag = testi;
         }  // end if 'L'
         if(tempc == 'S') // satellite info
         {
-          VERIFY_IO(fscanf(system_vars.config_file," %d",&testi), 1);
+          fscanf(system_vars.config_file," %d",&testi);
           num_sats = testi;
           if(num_sats == 99) // search all satellites
           {
@@ -512,7 +509,7 @@ int read_config_file()
             // read in specific satellties to search for
             for (i = 0; i < num_sats; i++)
             {
-              VERIFY_IO(fscanf(system_vars.config_file," %d",&testi), 1);
+              fscanf(system_vars.config_file," %d",&testi);
               system_vars.prn_search_list[i] = testi;
             }
             system_vars.num_search_svs = num_sats;
@@ -521,7 +518,7 @@ int read_config_file()
         }  // end if 'S'
         if(tempc == 'T') // time to process, in seconds
         {
-          VERIFY_IO(fscanf(system_vars.config_file," %lf",&testd), 1);
+          fscanf(system_vars.config_file," %lf",&testd);
           system_vars.run_time = testd;
         }  // end if 'T'
         if(tempc == 'G')
@@ -530,23 +527,23 @@ int read_config_file()
           double Kco_temp, Kco2_temp, Kca2_fll1_temp, Kca2_fll2_temp;
           double Kca2_pll_temp, Kca3_pll_temp;
           /* Tracking loop intervals and gains */
-          VERIFY_IO(fscanf(system_vars.config_file," %d",&testi), 1);
+          fscanf(system_vars.config_file," %d",&testi);
           interval1 = testi;
-          VERIFY_IO(fscanf(system_vars.config_file," %d",&testi), 1);
+          fscanf(system_vars.config_file," %d",&testi);
           interval2 = testi;
-          VERIFY_IO(fscanf(system_vars.config_file," %d",&testi), 1);
+          fscanf(system_vars.config_file," %d",&testi);
           interval3 = testi;
-          VERIFY_IO(fscanf(system_vars.config_file," %lf",&testd), 1);
+          fscanf(system_vars.config_file," %lf",&testd);
           Kco_temp = testd;
-          VERIFY_IO(fscanf(system_vars.config_file," %lf",&testd), 1);
+          fscanf(system_vars.config_file," %lf",&testd);
           Kco2_temp = testd;
-          VERIFY_IO(fscanf(system_vars.config_file," %lf",&testd), 1);
+          fscanf(system_vars.config_file," %lf",&testd);
           Kca2_fll1_temp = testd;
-          VERIFY_IO(fscanf(system_vars.config_file," %lf",&testd), 1);
+          fscanf(system_vars.config_file," %lf",&testd);
           Kca2_fll2_temp = testd;
-          VERIFY_IO(fscanf(system_vars.config_file," %lf",&testd), 1);
+          fscanf(system_vars.config_file," %lf",&testd);
           Kca2_pll_temp = testd;
-          VERIFY_IO(fscanf(system_vars.config_file," %lf",&testd), 1);
+          fscanf(system_vars.config_file," %lf",&testd);
           Kca3_pll_temp = testd;
           for (ch_idx = 0; ch_idx < MAX_CHANNELS; ch_idx++)
           {
@@ -565,8 +562,7 @@ int read_config_file()
         if(tempc == 'W') // waas corrections file
         {
           /* WAAS corrections file */
-          VERIFY_IO(fscanf(system_vars.config_file," %200s",
-                           system_vars.WAASfilename), 1);
+          fscanf(system_vars.config_file," %s",system_vars.WAASfilename);
           system_vars.waas_flag = YES;
         }  // end if 'W'
       }  // if '\'
@@ -574,6 +570,7 @@ int read_config_file()
   }  // end else
   return retval;
 }
+
 
 void update_acq_log()
 {
