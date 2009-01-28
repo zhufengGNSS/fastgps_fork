@@ -154,13 +154,15 @@ void tracking_update(struct channel *x)
 		x->track.carr_error = 0.0;
 		if (x->state_ms >= 1)
     {
-      // frequency detector
-      double den = x->ip*x->track.ip_last - x->track.qp_last*x->qp;
+      // frequency descriminator, 4 quadrant arctan, atan(cross,dot)
+      double num = x->qp*x->track.ip_last - x->ip*x->track.qp_last;  
+      double den = x->ip*x->track.ip_last + x->qp*x->track.qp_last;  
+
       if(den == 0)
         x->track.carr_error = 0.0;
       else
         // calculate freq error discriminator, not normalized by (2*PI)
-        x->track.carr_error = -atan2((x->ip*x->track.qp_last - x->track.ip_last*x->qp),den);
+        x->track.carr_error = atan2(num,den);
     }
 
 		// FLL gain switch
