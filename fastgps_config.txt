@@ -90,15 +90,15 @@ D data/stanford_quad_16_may_2008_09_12_pdt.dat
 
 # Satellites
 S 5 2 13 25 27 4   # Guild
+S 1 2       # prn2 only, Guild
 ^S 99		# cold search
-S 22
 S 100		# use last acq log file to acquire
 
 # Ephemeris file
 E 1        # use it
 
 # Process Time
-T 5.0		# seconds
+T 4.0		# seconds
 ^T 15.0		# seconds
 T 20.0		# seconds
 T 35.0		# seconds
@@ -107,7 +107,7 @@ T 35.0		# seconds
 ^L 1 1 3 	# acq,track,nav(w google) on
 
 # Tracking Loop Gains and Intervals
-G 500 1000 1500 0.004 1.0 0.10 1.15 0.10 0.93 	# default values, Test
+G 500 1000 1500 0.004 1.0 0.10 1.15 0.10 0.93 	# default values, 
 
 # Aiding information
 ^A 1 1479 4 data/igu14794_06.sp3   # Guildford
