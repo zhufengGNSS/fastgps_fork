@@ -6,10 +6,8 @@ LIBS = -lm -L../libfastgps -lfastgps
 
 # flags for Intel Core Duo
 INCLUDES = -I../libfastgps
-#CPPFLAGS = -Wall -Werror -g -O2 -march=prescott -msse2 -fomit-frame-pointer $(INCLUDES)
-#CPPFLAGS = -g -O2 $(INCLUDES)
-#CFLAGS= -march=i386 -O3 -pipe -fomit-frame-pointer
-CPPFLAGS= -g -O2 $(INCLUDES)
+CPPFLAGS = -Wall -Werror -g -O2 -march=prescott -msse2 -fomit-frame-pointer $(INCLUDES)
+#CPPFLAGS= -g -O2 $(INCLUDES)
 
 default: .depend $(OUT)
 
