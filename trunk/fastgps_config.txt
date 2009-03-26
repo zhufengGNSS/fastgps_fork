@@ -81,15 +81,13 @@
 #
 
 # datafile location. Change to reflect your data file.
-D data/stanford_quad_16_may_2008_09_10_pdt.dat
-D data/stanford_quad_16_may_2008_09_12_pdt.dat
-^D data/May15_2008_Guild5.dat
+^D data/May15_2008_Guildford_DataSet1.dat
+D data/May16_2008_Stanford_DataSet2.dat
 
 # Frequencies
 ^F 16.3676e6 4.1304e6	# SiGe, sampling frequency, IF
 
 # Satellites
-S 5 2 13 25 27 4   # Guild
 S 1 2       # prn2 only, Guild
 ^S 99		# cold search
 S 100		# use last acq log file to acquire
@@ -111,7 +109,7 @@ G 500 1000 1500 0.004 1.0 0.10 1.15 0.10 0.93 	# default values,
 
 # Aiding information
 ^A 1 1479 4 data/igu14794_06.sp3   # Guildford
-A 1 1479 5 data/demo_sp3
+A 1 1479 4 data/igu14795_18.sp3   # Stanford
 
 # WAAS Differential Corrections, Ionosphere
 W data/demo_igp

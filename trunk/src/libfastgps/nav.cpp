@@ -588,17 +588,21 @@ int GetSVInfo(struct s_SV_Info *sv, char *infileXname)
 {
   int retval = SUCCESS;
   //int prnNum;
-  char prnNum[3];
+  char prnNum[10];
   string prnNum_str;
   DateTime currEpoch;
   double PosVel[10];
   string orbfile;
   GPSTime x;
   SP3cFile mysp3;
+
+  // this hack prevents the occasional crash on array copying (on some platforms)
   sprintf(prnNum,"G%2d",sv->prn);
   if(sv->prn < 10)
-    prnNum[1] = '0';  // I hate strings
-  prnNum_str = prnNum;
+	prnNum[1] = '0';  // I hate strings
+  for(int i = 0; i < 3; i++)
+    prnNum_str += prnNum[i];
+
   x.GPSWeek = sv->week;
   x.secsOfWeek = sv->TOW;
   currEpoch = DateTime(x);
