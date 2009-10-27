@@ -44,10 +44,10 @@
 #include "datetime.h"
 #include "intrpsp3c.h"
 
-#define VERIFY_IO(STMT, VAL) { if ((STMT)!= (VAL)) ; }
-
-// this function is implemented differently in the CLI and GUI versions
+// this function is implemented differently in the CLI, GUI, and MSVC versions
 void fastgps_printf(const char *format, ...);
+
+#define VERIFY_IO(STMT, VAL) { if ((STMT)!= (VAL)) { fastgps_printf("i/o error at %d in %s\n", __LINE__, __FILE__); } }
 
 #endif
 

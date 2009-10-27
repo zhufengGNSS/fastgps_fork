@@ -361,7 +361,7 @@ int SP3cFile::getSVPosVel(DateTime tuser, string PRNid, double rvec[])
     return( -2 );
   }
 
-  SVsig = pow(2, (int)svAccur[jsv])/1000.0; // units: meters
+  SVsig = pow(2.0, (int)svAccur[jsv])/1000.0; // units: meters
 
   trun = (tuser - SP3StartTime)*86400.0;  // diff between DateTimes = days
   trun = trun/SP3interval + 1.0;

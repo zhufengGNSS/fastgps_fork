@@ -49,7 +49,7 @@ DateTime::DateTime() { mjd = 0; fractionOfDay = 0.0; }
 
 DateTime::DateTime( GPSTime gpstime )
 {
-   mjd = gpstime.GPSWeek*7 + gpstime.secsOfWeek/SECPERDAY + JAN61980;
+   mjd = gpstime.GPSWeek*7 + (long)(gpstime.secsOfWeek/SECPERDAY) + JAN61980;
    fractionOfDay = fmod(gpstime.secsOfWeek,SECPERDAY)/SECPERDAY;
 }
 
@@ -172,8 +172,8 @@ YDOYHMS DateTime::GetYDOYHMS()
 
    yy.year = yearsSoFar + deltaYears;
    yy.dayOfYear = daysLeft - 365*deltaYears + 1;
-   yy.hour = fractionOfDay*24.0;
-   yy.min = fractionOfDay*1440.0 - yy.hour*60.0;
+   yy.hour = (long)(fractionOfDay*24.0);
+   yy.min = (long)(fractionOfDay*1440.0 - yy.hour*60.0);
    yy.sec = fractionOfDay*86400.0 - yy.hour*3600.0 - yy.min*60.0;
 
    return yy;
@@ -193,11 +193,11 @@ YMDHMS DateTime::GetYMDHMS()
 
    ymd.year = yearsSoFar + deltaYears;
    doy = daysLeft - 365*deltaYears + 1;
-   ymd.hour = fractionOfDay*24.0;
-   ymd.min = fractionOfDay*1440.0 - ymd.hour*60.0;
+   ymd.hour = (long)(fractionOfDay*24.0);
+   ymd.min = (long)(fractionOfDay*1440.0 - ymd.hour*60.0);
    ymd.sec = fractionOfDay*86400.0 - ymd.hour*3600.0 - ymd.min*60.0;
 
-   guess = doy*0.032;
+   guess = (long)(doy*0.032);
    more = 0;
    if( ymd.year%4 == 0 )   // good until the year 2100
    {
