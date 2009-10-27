@@ -6,7 +6,7 @@ LIBS = -lm -L../libfastgps -lfastgps `wx-config --libs`
 CCC  = g++
 
 INCLUDES = -I../libfastgps
-CPPFLAGS = -g -O2 -march=prescott -msse2 -fomit-frame-pointer $(INCLUDES) `wx-config --cxxflags`
+CPPFLAGS = -g -O2 -msse2 -fomit-frame-pointer $(INCLUDES) `wx-config --cxxflags`
 #CPPFLAGS = -g -O2 $(INCLUDES) `wx-config --cxxflags`
 
 default: $(OUT)
