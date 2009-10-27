@@ -32,7 +32,7 @@ char acq_buf[153000];     // sampling freq 38.192e6 max
 
 unsigned acq_buf_write_pos;
 
-static kiss_fft_cpx *code_fft[32];
+static kiss_fft_cpx *code_fft[MAX_SATELLITES];
 static kiss_fft_cfg sample_fft_cfg, inverse_fft_cfg;
 static int sample_idx;
 static kiss_fft_cpx *sample_buf, *sample_fft, *mult_result, *inverse_fft;
@@ -83,47 +83,47 @@ unsigned acq_buffer_full2(unsigned cidx)
     avg_energy = 1;
     max_energy = 0;
 
-	ch->car_phase_inc = 2 * M_PI * 
+    ch->car_phase_inc = 2 * M_PI * 
                         (system_vars.IF + dopplers[ch->acq.doppler_idx]) / 
                         system_vars.sampling_freq;
 
-    
     // load I and Q samples into FFT buffer
-	for (s = 0; s < system_vars.acq_buf_len; s++)
-	{
-		char sample = acq_buf[s];
-		nco_sin = GPS_SIN(ch->car_phase);
-		nco_cos = GPS_COS(ch->car_phase);
-		i =  sample * nco_cos;
-		q = -sample * nco_sin;
-		ch->car_phase += ch->car_phase_inc;
-		UNWRAP_ANGLE(ch->car_phase);
-		sample_buf[s].r = i;
-		sample_buf[s].i = q;
-	}
+  	for (s = 0; s < system_vars.acq_buf_len; s++)
+    {
+      char sample = acq_buf[s];
+      nco_sin = GPS_SIN(ch->car_phase);
+      nco_cos = GPS_COS(ch->car_phase);
+      i =  sample * nco_cos;
+      q = -sample * nco_sin;
+      ch->car_phase += ch->car_phase_inc;
+      UNWRAP_ANGLE(ch->car_phase);
+      sample_buf[s].r = i;
+      sample_buf[s].i = q;
+    }
 
     // Perform FFT on data and perform multiply with (pre-calculated) PRN code FFT 
     kiss_fft(sample_fft_cfg, sample_buf, sample_fft);
-	for (s = 0; s < system_vars.acq_buf_len; s++)
-	{
-		mult_result[s].r = sample_fft[s].r * code_fft[ch->prn_num-1][s].r -
-                        sample_fft[s].i * code_fft[ch->prn_num-1][s].i;
-		mult_result[s].i = sample_fft[s].r * code_fft[ch->prn_num-1][s].i + 
-                        sample_fft[s].i * code_fft[ch->prn_num-1][s].r;
-	}
+    for (s = 0; s < system_vars.acq_buf_len; s++)
+    {
+      mult_result[s].r = sample_fft[s].r * code_fft[ch->prn_num-1][s].r -
+                         sample_fft[s].i * code_fft[ch->prn_num-1][s].i;
+      mult_result[s].i = sample_fft[s].r * code_fft[ch->prn_num-1][s].i + 
+                         sample_fft[s].i * code_fft[ch->prn_num-1][s].r;
+    }
 
     // Perform Inverse FFT of frequency domain multiplication
     kiss_fft(inverse_fft_cfg, mult_result, inverse_fft);
 		
-	// search the IFFT result for signal peaks
+    // search the IFFT result for signal peaks
+    //printf("%f\n", max_shift_energy[10]);
     for (s = 0; s < system_vars.acq_buf_len; s++)
     {
-      double d;
-      d = inverse_fft[s].r * inverse_fft[s].r + 
-          inverse_fft[s].i * inverse_fft[s].i;
-      if (d > max_shift_energy[s % (system_vars.acq_buf_len / ACQ_MS)])
+      double d = inverse_fft[s].r * inverse_fft[s].r + 
+                 inverse_fft[s].i * inverse_fft[s].i;
+      unsigned idx = s % (system_vars.acq_buf_len / ACQ_MS);
+      if (d > max_shift_energy[idx])
       {
-        max_shift_energy[s % (system_vars.acq_buf_len / ACQ_MS)] = d;
+        max_shift_energy[idx] = d;
         if (d > max_energy)
         {
           max_doppler = dopplers[ch->acq.doppler_idx];
@@ -319,7 +319,7 @@ void init_fft_acq()
 	// sample the C/A code for all satellites
 	uint8_t sv_num, ch_idx;
 	gps_real_t code_time, code_time_inc;
-	unsigned s, shift_init;
+	unsigned s;
   kiss_fft_scalar *sampled_code;
   kiss_fftr_cfg forward_fft_cfg;
   //kiss_fft_cpx *fft_buf;
@@ -329,7 +329,7 @@ void init_fft_acq()
 	code_time_inc = 1.0 / system_vars.sampling_freq;
   unsigned acq_fft_len = kiss_fft_next_fast_size(system_vars.acq_buf_len);
 	sampled_code = (kiss_fft_scalar *)malloc(sizeof(kiss_fft_cpx) * acq_fft_len);
-  memset(sampled_code, 0, acq_fft_len);
+  memset(sampled_code, 0, sizeof(kiss_fft_cpx) * acq_fft_len);
   //system_vars.acq_buf_len = 654;
   fastgps_printf("acq buf len = %d\n", acq_fft_len);
   forward_fft_cfg = kiss_fftr_alloc(acq_fft_len, 0, NULL, NULL);
@@ -339,6 +339,7 @@ void init_fft_acq()
 	{
 		code_fft[sv_num] = (kiss_fft_cpx *)malloc(sizeof(kiss_fft_cpx) * 
                                               acq_fft_len);
+    memset(code_fft[sv_num], 0, sizeof(kiss_fft_cpx) * acq_fft_len);
 		code_time = 0;
 		for (s = 0; s < system_vars.acq_buf_len / ACQ_MS; s++)
 		{
@@ -367,15 +368,14 @@ void init_fft_acq()
   sample_fft_cfg = kiss_fft_alloc(acq_fft_len, 0, NULL, NULL);
   inverse_fft_cfg = kiss_fft_alloc(acq_fft_len, 1, NULL, NULL);
 	max_shift_energy = (double *)malloc(sizeof(double) * acq_fft_len);
-	for (shift_init = 0; shift_init < acq_fft_len; shift_init++)
-		max_shift_energy[shift_init] = 0;
+  memset(max_shift_energy, 0, sizeof(double) * acq_fft_len);
 	avg_energy = 0;
 	max_energy = 0;
 	for (ch_idx = 0; ch_idx < MAX_CHANNELS; ch_idx++)
 		c[ch_idx].acq.failure_count = 0;
-	fastgps_printf("done\n");
   kiss_fft_free(forward_fft_cfg);
   free(sampled_code);
+	fastgps_printf("done\n");
 }
 
 // **********************************************************************
@@ -384,7 +384,7 @@ void init_fft_acq()
 
 void shutdown_fft_acq()
 {
-  for (uint8_t sv = 0; sv < 32; sv++)
+  for (uint8_t sv = 0; sv < MAX_SATELLITES; sv++)
     free(code_fft[sv]);
   kiss_fft_free(sample_fft_cfg);
   kiss_fft_free(inverse_fft_cfg);
