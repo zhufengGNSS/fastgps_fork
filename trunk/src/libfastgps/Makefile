@@ -21,11 +21,8 @@ CC   =  gcc
 CCC  =  g++
 LIBS = -lm 
 
-# flags for Intel Core 2
 CFLAGS   = -g -O2 -msse2 -fomit-frame-pointer -Wall -Werror
 CPPFLAGS = -g -O2 -msse2 -fomit-frame-pointer -Wall -Werror
-#CFLAGS   = -g -O2 
-#CPPFLAGS = -g -O2 
 
 default: .depend $(OUT)
 
