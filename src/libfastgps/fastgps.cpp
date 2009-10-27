@@ -115,7 +115,7 @@ int run_fastgps()
 
   double loop_time = DATA_BUF_SIZE/system_vars.sampling_freq;
   double watch_interval = 0.5;     // approximate
-  unsigned loops_per_watch = watch_interval/loop_time;
+  unsigned loops_per_watch = (unsigned)(watch_interval / loop_time);
   system_vars.next_pvt_time = 0.0;
 
   if(system_vars.acq_log_flag == DEBUG_LOGGING)
@@ -136,7 +136,7 @@ int run_fastgps()
                                system_vars.sampling_freq;
     system_vars.loop_count++;
     // Print message every so often
-    if (fmod(system_vars.loop_count,loops_per_watch) == 0)
+    if (system_vars.loop_count % loops_per_watch == 0)
       fastgps_printf("processing time = %.3f\n", system_vars.process_time);
 
     // if receiver time has been set, update over this data interval
@@ -201,7 +201,7 @@ int run_fastgps()
                              c[system_vars.search_channel].prn_num,
                              system_vars.search_channel);
               // if satellite found, don't search for it anymore
-              system_vars.sats_found |= (1 << c[system_vars.search_channel].prn_num);
+              system_vars.sats_found |= ((uint64_t)1 << c[system_vars.search_channel].prn_num);
               // store channel this sv will be tracked on
               system_vars.prn_to_channel_map[c[system_vars.search_channel].prn_num] = system_vars.search_channel;
               // rotate to next channel

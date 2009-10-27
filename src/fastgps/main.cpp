@@ -42,6 +42,6 @@ void fastgps_printf(const char *format, ...)
 
 int main(int, char **)
 {
-  return run_fastgps();
+	return run_fastgps();
 }
 

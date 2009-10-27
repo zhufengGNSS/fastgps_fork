@@ -1,0 +1,29 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 10.00
+# Visual C++ Express 2008
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "libfastgps", "libfastgps.vcproj", "{5A26BC7E-E879-49BF-8D2D-E814D67918B4}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "fastgps", "fastgps.vcproj", "{C0E25B8A-E4B2-430D-930E-5D33F607F1DF}"
+	ProjectSection(ProjectDependencies) = postProject
+		{5A26BC7E-E879-49BF-8D2D-E814D67918B4} = {5A26BC7E-E879-49BF-8D2D-E814D67918B4}
+	EndProjectSection
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Win32 = Debug|Win32
+		Release|Win32 = Release|Win32
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{5A26BC7E-E879-49BF-8D2D-E814D67918B4}.Debug|Win32.ActiveCfg = Debug|Win32
+		{5A26BC7E-E879-49BF-8D2D-E814D67918B4}.Debug|Win32.Build.0 = Debug|Win32
+		{5A26BC7E-E879-49BF-8D2D-E814D67918B4}.Release|Win32.ActiveCfg = Release|Win32
+		{5A26BC7E-E879-49BF-8D2D-E814D67918B4}.Release|Win32.Build.0 = Release|Win32
+		{C0E25B8A-E4B2-430D-930E-5D33F607F1DF}.Debug|Win32.ActiveCfg = Debug|Win32
+		{C0E25B8A-E4B2-430D-930E-5D33F607F1DF}.Debug|Win32.Build.0 = Debug|Win32
+		{C0E25B8A-E4B2-430D-930E-5D33F607F1DF}.Release|Win32.ActiveCfg = Release|Win32
+		{C0E25B8A-E4B2-430D-930E-5D33F607F1DF}.Release|Win32.Build.0 = Release|Win32
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+EndGlobal

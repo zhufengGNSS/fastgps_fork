@@ -459,7 +459,7 @@ int read_acquisiton_file()
           VERIFY_IO(fscanf(infile," %lf",&testd), 1);
           c[tempchan].code_prompt = testd;
           VERIFY_IO(fscanf(infile," %lf",&testd), 1);
-          c[tempchan].acq.acq_finish_time = testd;
+          c[tempchan].acq.acq_finish_time = (unsigned)testd;
           c[tempchan].state = CH_STATE_POSTACQ_SPIN;
           fastgps_printf("Allocating PRN %d to channel %d\n",
                          c[tempchan].prn_num, tempchan);

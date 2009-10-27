@@ -60,7 +60,7 @@ void tracking_update(struct channel *x)
         // before we start decoding nav data,
         // find the start of the nav bit during the pullin interval,
         // by watching for the bit flip on the I prompt correlator
-		x->track.nav_deriv[x->state_ms % MS_PER_NAV_BIT] += fabs(x->ip - x->track.ip_last);
+		x->track.nav_deriv[x->state_ms % MS_PER_NAV_BIT] += abs(x->ip - x->track.ip_last);
 
 		x->track.code_lock_threshold = x->track.P_filt/2;  // if signal magnitude drops by half we've lost signal
 
