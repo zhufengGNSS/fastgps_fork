@@ -102,7 +102,8 @@ void tracking_update(struct channel *x)
             x->track.current_nav_bit = (nav_bit > 0 ? 1 : -1);
 
             /* process each nav bit as its received */
-            process_nav_bit(x, x->track.current_nav_bit);
+            if(system_vars.snap_shot_flag == NO)
+                process_nav_bit(x, x->track.current_nav_bit);
 
 		}
 		// reset bit counter and sum

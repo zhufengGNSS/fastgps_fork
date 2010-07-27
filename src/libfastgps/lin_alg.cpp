@@ -30,6 +30,85 @@
 
 #include "fastgps.h"
 
+// written by Mike Dinolfo 12/98
+// slightly modified by Kim Chang
+// input matrix must be square and all DIAGONAL ELEMENTS MUST BE NONZERO
+// overwrites original matrix
+void invert(unsigned actualsize,double *data){
+double sum,x;
+unsigned i,j,k;
+unsigned maxsize = actualsize;
+
+    if (actualsize < 2) return;  // must be of dimension >= 2
+
+    for (i=1; i < actualsize; i++){
+        data[i] /= data[0]; // normalize row 0
+    }
+
+    for(i=1; i < actualsize; i++){
+      for(j=i; j < actualsize; j++){ // do a column of L
+        sum = 0.0;
+        for(k = 0; k < i; k++){
+            sum += data[j*maxsize+k] * data[k*maxsize+i];
+        }
+        data[j*maxsize+i] -= sum;
+      }
+      if(i == actualsize-1) continue;
+      for(j=i+1; j < actualsize; j++){  // do a row of U
+        sum = 0.0;
+        for(k = 0; k < i; k++)
+            sum += data[i*maxsize+k]*data[k*maxsize+j];
+            data[i*maxsize+j] = (data[i*maxsize+j]-sum) / data[i*maxsize+i];
+      }
+    }  // end of i loop
+
+    for(i = 0; i < actualsize; i++ ){  // invert L
+      for(j = i; j < actualsize; j++ )  {
+        x = 1.0;
+        if( i != j ) {
+          x = 0.0;
+          for(k = i; k < j; k++ ) {
+              x -= data[j*maxsize+k]*data[k*maxsize+i];
+          }
+        }
+        data[j*maxsize+i] = x / data[j*maxsize+j];
+      }
+    } // end of i loop
+
+    for(i = 0; i < actualsize; i++ ){   // invert U
+      for(j = i; j < actualsize; j++ )  {
+        if( i == j ) continue;
+        sum = 0.0;
+        for(k = i; k < j; k++ ){
+            sum += data[k*maxsize+j]*( (i==k) ? 1.0 : data[i*maxsize+k] );
+        }
+        data[i*maxsize+j] = -sum;
+        }
+    } // end of i loop
+
+    for(i = 0; i < actualsize; i++ ){   // final inversion
+      for(j = 0; j < actualsize; j++ ){
+        sum = 0.0;
+        for(k = ((i>j)?i:j); k < actualsize; k++ ){
+            sum += ((j==k)?1.0:data[j*maxsize+k])*data[k*maxsize+i];
+        }
+        data[j*maxsize+i] = sum;
+      }
+    } // end of i loop
+
+} // end of function
+
+double  vector_dot_product (double *a, double *b)
+{
+double  c =   0.0;
+int     i;
+
+for ( i = 0 ; i < 3 ; i++ )
+     c +=  a[i]*b[i];
+
+return (c);
+}
+
 void invert4x4(double A[4][4], double Ainv[4][4])
 {
 	double detA = A[0][0]*A[1][1]*A[2][2]*A[3][3]-A[0][0]*A[1][1]*A[2][3]*A[3][2]-A[0][0]*A[2][1]*A[1][2]*A[3][3]+A[0][0]*A[2][1]*A[1][3]*A[3][2]+A[0][0]*A[3][1]*A[1][2]*A[2][3]-A[0][0]*A[3][1]*A[1][3]*A[2][2]-A[1][0]*A[0][1]*A[2][2]*A[3][3]+A[1][0]*A[0][1]*A[2][3]*A[3][2]+A[1][0]*A[2][1]*A[0][2]*A[3][3]-A[1][0]*A[2][1]*A[0][3]*A[3][2]-A[1][0]*A[3][1]*A[0][2]*A[2][3]+A[1][0]*A[3][1]*A[0][3]*A[2][2]+A[2][0]*A[0][1]*A[1][2]*A[3][3]-A[2][0]*A[0][1]*A[1][3]*A[3][2]-A[2][0]*A[1][1]*A[0][2]*A[3][3]+A[2][0]*A[1][1]*A[0][3]*A[3][2]+A[2][0]*A[3][1]*A[0][2]*A[1][3]-A[2][0]*A[3][1]*A[0][3]*A[1][2]-A[3][0]*A[0][1]*A[1][2]*A[2][3]+A[3][0]*A[0][1]*A[1][3]*A[2][2]+A[3][0]*A[1][1]*A[0][2]*A[2][3]-A[3][0]*A[1][1]*A[0][3]*A[2][2]-A[3][0]*A[2][1]*A[0][2]*A[1][3]+A[3][0]*A[2][1]*A[0][3]*A[1][2];

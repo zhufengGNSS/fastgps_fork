@@ -69,6 +69,7 @@ void save_ephemeris(struct channel *x);
 int read_ephemeris_file();
 
 // navigation
+int LeastSquaresPosition(void);
 void nav_init();
 unsigned int calc_pseudoranges();
 int GetSVInfo(struct s_SV_Info *sv, char *infileXname);
@@ -79,7 +80,23 @@ int ReadWAASFile(double phi_pp_deg,double lambda_pp_deg,double *IGP_points);
 double CalculateDelayCorrection(int chan);
 void CalculateAzEl(double RxXYZ[3],double SatXYZ[3], double *A,double *E);
 
+// Doppler position
+int DopplerPosition(void);
+int CalcDopplerPosition(s_nav_packet_dopp *pkt);
+void update_debug_log3(int num_points);
+void update_nav_log3(void);
+
+// snap shot position
+int SingleEpochPosition(void);
+int CalcSingleEpochPosition(s_nav_packet *pkt,int signal);
+int GetSVInfo2(double *PosVelClk, int prn, int gpsweek, double gpssecs, char *infileXname);
+void update_debug_log(int num_points);
+void update_nav_log2(void);
+double predicted_doppler(int gpsweek, double gpssecs,int prn,double *rxpos,double *rxvel);
+
 // linear algebra
+void invert(unsigned actualsize,double *data);
+double  vector_dot_product (double *a, double *b);
 void invert4x4(double A[4][4], double Ainv[4][4]);
 double vector_norm(double v[3]);
 void vector_subtract(double a[3], double b[3],double c[3]);

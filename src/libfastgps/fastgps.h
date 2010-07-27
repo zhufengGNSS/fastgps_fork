@@ -38,6 +38,8 @@
 #include <math.h>
 
 #include "parameters.h"
+#include "dopp_pos.h"
+#include "snap_shot.h"
 #include "structs.h"
 #include "funcs.h"
 #include "globals.h"

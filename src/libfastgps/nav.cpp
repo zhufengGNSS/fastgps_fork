@@ -35,6 +35,119 @@
 extern fastgps_wxFrame *MainFrame;
 #endif
 
+//* *******************************************************************************
+//  LeastSquares Position
+//* *******************************************************************************
+
+int LeastSquaresPosition(void){
+int retval = 0;
+unsigned ch_idx;
+
+        system_vars.num_valid_meas = 0;
+        // if we have a valid TOW, make a pseudorange measurements
+        retval = calc_pseudoranges();
+        // loop through the tracking channels, again
+        for (ch_idx = 0; ch_idx < system_vars.num_channels; ch_idx++)
+        {
+          c[ch_idx].nav.valid_for_pvt = NO;
+          if(c[ch_idx].nav.pseudorange_valid == YES)
+          {
+            // calculate satellite positions and clock bias
+            if(c[ch_idx].nav.nav_data_state == HAVE_EPH)
+            {
+              if(!system_vars.recv_time_valid)
+              {
+                // calculate satellite positions at common receiver time
+                retval = ProcessEphemeris(system_vars.nav_GPS_week,
+                    system_vars.nav_GPS_secs,
+                    (unsigned int) c[ch_idx].prn_num,
+                    &c[ch_idx].nav);
+              }
+              else
+              {
+                // calculate satellite positions at transmission time
+                retval = ProcessEphemeris(system_vars.nav_GPS_week,
+                    c[ch_idx].nav.tx_time,
+                    (unsigned int) c[ch_idx].prn_num,
+                    &c[ch_idx].nav);
+              }
+              if(retval == SUCCESS)
+              {
+                c[ch_idx].nav.valid_for_pvt = YES;
+                system_vars.num_valid_meas++;
+              }
+            }
+            else
+            {
+              // check for external sat data, i.e. IGS
+              if (system_vars.pvt_aiding_flag == HAVE_EXTERNAL_EPH)
+              {
+                // call IGS routine with week,secs and sv to retrieve sat pos
+                // vel and clkbias
+
+                s_SV_Info sv_info;
+                sv_info.prn = c[ch_idx].prn_num;
+                sv_info.week = system_vars.nav_GPS_week;
+                // calc sat positions at common receiver time or tx time
+                if (!system_vars.recv_time_valid)
+                  sv_info.TOW = system_vars.nav_GPS_secs;
+                else
+                  sv_info.TOW = c[ch_idx].nav.tx_time;
+                retval = GetSVInfo(&sv_info,system_vars.IGSfilename);
+                if(retval == 0)
+                {
+                  c[ch_idx].nav.sat_pos[0] = sv_info.posxyz[0];
+                  c[ch_idx].nav.sat_pos[1] = sv_info.posxyz[1];
+                  c[ch_idx].nav.sat_pos[2] = sv_info.posxyz[2];
+                  c[ch_idx].nav.clock_corr = sv_info.clk_bias;
+                  c[ch_idx].nav.sat_vel[0] = sv_info.velxyz[0];
+                  c[ch_idx].nav.sat_vel[1] = sv_info.velxyz[1];
+                  c[ch_idx].nav.sat_vel[2] = sv_info.velxyz[2];
+                  c[ch_idx].nav.clock_drift = sv_info.clk_drift;
+                  c[ch_idx].nav.valid_for_pvt = YES;
+                  system_vars.num_valid_meas++;
+                }
+              }
+              else
+              {
+                // no dice, we have to wait for the eph to be decoded in the
+                // nav data
+              }
+            }
+            // apply WAAS ionosphere correction
+            if (system_vars.Rx_State == NAV &&
+                system_vars.waas_flag == YES &&
+                c[ch_idx].nav.valid_for_pvt == YES)
+              retval = WAAS_corrections(ch_idx);
+          }
+        } // end channel loop
+
+        // Estimate the receiver position, this assumes everything went perfect
+        // above
+        if(system_vars.num_valid_meas >= MINIMUM_PVT_SATELLITES)
+        {
+
+          /* *********************************** */
+          /*    LSQ Position/Velocity Solution   */
+          /* *********************************** */
+          retval = PVT_Solution(system_vars.num_channels);
+
+          if(retval == SUCCESS){
+            update_nav_log(); // update navigation logs
+          }
+          if(system_vars.Rx_State != NAV)
+          {
+            system_vars.Rx_State = NAV;
+            fastgps_printf("\nStarting Navigation Calculation.\n\n");
+          }
+        } // end  system_vars.num_valid_meas >= MINIMUM_PVT_SATELLITES
+
+return(retval);
+}
+
+//* *******************************************************************************
+//  PVT_Solution
+//* *******************************************************************************
 
 unsigned int PVT_Solution(int num_chans)
 {
@@ -86,10 +199,10 @@ unsigned int PVT_Solution(int num_chans)
     PVT_Info[num_valid_chans].doppler = c[i].nav.doppler_meas;
 
     // apply sat clock bias correction to psuedorange
-    PVT_Info[num_valid_chans].pseudorange += 
+    PVT_Info[num_valid_chans].pseudorange +=
                                    PVT_Info[num_valid_chans].satclk_bias*NAV_C;
     // calculate pseudorange rate, m/s
-    PVT_Info[num_valid_chans].pseudorange_dot = 
+    PVT_Info[num_valid_chans].pseudorange_dot =
                      ((NAV_C*PVT_Info[num_valid_chans].doppler)/(CARRIER_FREQ))
                      - PVT_Info[num_valid_chans].satclk_drift*NAV_C;
     // TODO: velocity info
@@ -103,13 +216,13 @@ unsigned int PVT_Solution(int num_chans)
   // Position Solution #
   //####################
 
-  // Initial guess for Rx position, for starters lets use the truth with an 
+  // Initial guess for Rx position, for starters lets use the truth with an
   // offset (so as not to make it too easy)
   Rx_Pos[0] = system_vars.initial_pos_guess[0];   // WGS84 X
   Rx_Pos[1] = system_vars.initial_pos_guess[1];   // WGS84 Y
   Rx_Pos[2] = system_vars.initial_pos_guess[2];   // WGS84 Z
 
-  // if solution does not converge after this many iterations, 
+  // if solution does not converge after this many iterations,
   // something is wrong
   max_iterations = 10;
 
@@ -118,7 +231,7 @@ unsigned int PVT_Solution(int num_chans)
     // loop through valid measurements
     for (j=0;j<num_valid_chans;j++)
     {
-      // The satellite positions need to be corrected for Earth Rotation 
+      // The satellite positions need to be corrected for Earth Rotation
       // during the transmission time.
       vector_subtract(Rx_Pos,PVT_Info[j].satposxyz,tempv);
       v0vk_mag = vector_norm(tempv);
@@ -194,7 +307,7 @@ unsigned int PVT_Solution(int num_chans)
     {
       system_vars.recv_pos_refxyz[0] = Rx_Pos[0];
       system_vars.recv_pos_refxyz[1] = Rx_Pos[1];
-      system_vars.recv_pos_refxyz[2] = Rx_Pos[2];	
+      system_vars.recv_pos_refxyz[2] = Rx_Pos[2];
     }
     temp_XYZ[0] = Rx_Pos[0] - system_vars.recv_pos_refxyz[0];
     temp_XYZ[1] = Rx_Pos[1] - system_vars.recv_pos_refxyz[1];
@@ -222,7 +335,7 @@ unsigned int PVT_Solution(int num_chans)
   // Velocity Solution #
   //####################
 
-  // Step1, G, Gtrans and H matrix already exists from the 
+  // Step1, G, Gtrans and H matrix already exists from the
   // position calculation above.
   if (i < max_iterations)
   {
@@ -240,7 +353,7 @@ unsigned int PVT_Solution(int num_chans)
     matrix_multiply(4, 4, num_valid_chans, (double *)H,
                     (double *)Gtrans, (double *)X);
     for(k=0;k<num_valid_chans;k++)
-      tempvX[k] = pdot[k] + G[k][0]*Vs[k][0] + G[k][1]*Vs[k][1] + 
+      tempvX[k] = pdot[k] + G[k][0]*Vs[k][0] + G[k][1]*Vs[k][1] +
                   G[k][2]*Vs[k][2];
     matrix_multiply(4, num_valid_chans, 1, (double *)X,
                     (double *)tempvX,(double *)velsol);

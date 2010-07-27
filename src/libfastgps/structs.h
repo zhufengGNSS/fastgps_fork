@@ -207,6 +207,18 @@ struct s_system_vars
         double recv_time;
         unsigned recv_time_valid;
 
+        // doppler and snap shot position 
+        int snap_shot_flag;
+        int doppler_pos_flag;
+        int estimate_gpsweek;
+        double estimate_gpssecs;
+        double estimate_wgs84_pos[3];
+        int time_status;
+        int position_status;
+       	double recv_dopp_pos[4];  // coarse estimate from doppler, extra value for clock drift
+       	double recv_snapshot_pos[4];  // snap shot position estimate, extra value for clock bias
+       	double recv_snapshot_time;  // snap shot time estimate
+
         // files
         unsigned GoogleEarthHeaderWritten;
         char infilename[200];
@@ -219,10 +231,17 @@ struct s_system_vars
         FILE *acq_log;
         FILE *acq_log2;
         FILE *tracking_log;
+        FILE *tracking_log_test;
+        FILE *IQ_log;
         FILE *nav_log;
+        FILE *nav_log2;
+        FILE *nav_log3;
         FILE *eph_log;
         FILE *google_log;
 
+        double PVT_INTERVAL;
+        double LOOP_TIME;
+        int testi;
 };
 
 #endif
