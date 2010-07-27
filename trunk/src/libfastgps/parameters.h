@@ -63,11 +63,16 @@
 #define HAVE_TOW        1
 #define HAVE_EPH        2
 #define HAVE_EXTERNAL_EPH        1
-#define PVT_INTERVAL    0.02     // seconds
+#define XPVT_INTERVAL    0.2     // seconds
 #define NO_LOGGING      0
 #define NORMAL_LOGGING  1
 #define DEBUG_LOGGING   2
 #define GOOGLE_LOGGING  3
+
+#define HAVE_TIME_FILE__ESTIMATE 1
+#define HAVE_WGS84_FILE_ESTIMATE 1
+#define HAVE_DOPPLER_POS_ESTIMATE 2
+#define HAVE_SNAPSHOT_POS_ESTIMATE 3
 
 //#define MAX_CHANNELS 1
 #define MAX_CHANNELS 12

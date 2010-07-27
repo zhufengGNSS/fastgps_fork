@@ -22,7 +22,7 @@
 #include "fastgps.h"
 #include <stdio.h>
 #include <math.h>
-#include <stdlib.h>
+#include <stdlib.h> 
 #include <string.h>
 #include <time.h>
 #include <float.h>
@@ -31,7 +31,7 @@
 gps_real_t dopplers[NUM_COARSE_DOPPLERS], fine_dopplers[NUM_FINE_DOPPLERS];
 //////////////////////////////////////////////////////////////////////////////
 
-extern FILE *acq_debug;
+extern FILE *acq_debug; 
 extern FILE *acq_debug2;
 FILE *nav_debug;
 
@@ -45,7 +45,7 @@ int run_fastgps()
   char *data_buf;
   unsigned i,	sidx;
   unsigned int j;
-  unsigned retval;
+  unsigned retval,retval2;
 
   fastgps_printf("\r\nWelcome to our software receiver\r\n");
 
@@ -56,6 +56,7 @@ int run_fastgps()
   nav_init();
 
   // read the config file
+  system_vars.PVT_INTERVAL = XPVT_INTERVAL;  // just in case its not defined in file
   retval = read_config_file();
 
   if (retval == PROBLEM)
@@ -279,102 +280,68 @@ int run_fastgps()
       /*    Navigation         */
       /* ********************* */
 
-      // If we have subframe sync and TOW's we can try to perform nav solution
-      if (system_vars.num_valid_tow >= 1 && 
-          system_vars.process_time > system_vars.next_pvt_time)
+      /* *********************************** */
+      /*    Doppler Position Attempt         */
+      /* *********************************** */
+      if((system_vars.process_time > 0.5) && (system_vars.process_time > system_vars.next_pvt_time)
+          && (system_vars.doppler_pos_flag == YES)
+          && (system_vars.time_status == HAVE_TIME_FILE__ESTIMATE)
+          && (system_vars.position_status == 0))
       {
-        system_vars.next_pvt_time = system_vars.process_time + PVT_INTERVAL;
-        system_vars.num_valid_meas = 0;
-        // if we have a valid TOW, make a pseudorange measurements
-        retval = calc_pseudoranges();
-        // loop through the tracking channels, again
-        for (ch_idx = 0; ch_idx < system_vars.num_channels; ch_idx++)
-        {
-          c[ch_idx].nav.valid_for_pvt = NO;
-          if(c[ch_idx].nav.pseudorange_valid == YES)
+
+          fastgps_printf("Performing Doppler Position Calculation.\n");
+          system_vars.next_pvt_time = system_vars.process_time + system_vars.PVT_INTERVAL;
+          retval = DopplerPosition();
+
+      }
+
+      /* *********************************** */
+      /*    Single Epoch Position Attempt    */
+      /* *********************************** */
+      retval2 = 0;
+      if((system_vars.process_time > 0.5)
+          && (system_vars.process_time > system_vars.next_pvt_time)
+          && (system_vars.position_status != 0)
+          && (system_vars.snap_shot_flag == YES))
+      {
+
+          if(system_vars.Rx_State != NAV)
           {
-            // calculate satellite positions and clock bias
-            if(c[ch_idx].nav.nav_data_state == HAVE_EPH)
-            {
-              if(!system_vars.recv_time_valid)
-              {
-                // calculate satellite positions at common receiver time
-                retval = ProcessEphemeris(system_vars.nav_GPS_week, 
-                    system_vars.nav_GPS_secs,
-                    (unsigned int) c[ch_idx].prn_num,
-                    &c[ch_idx].nav);
-              }
-              else
-              {
-                // calculate satellite positions at transmission time
-                retval = ProcessEphemeris(system_vars.nav_GPS_week, 
-                    c[ch_idx].nav.tx_time,
-                    (unsigned int) c[ch_idx].prn_num,
-                    &c[ch_idx].nav);
-              }
-              if(retval == SUCCESS)
-              {
-                c[ch_idx].nav.valid_for_pvt = YES;
-                system_vars.num_valid_meas++;
-              }
-            }
-            else
-            {
-              // check for external sat data, i.e. IGS
-              if (system_vars.pvt_aiding_flag == HAVE_EXTERNAL_EPH)
-              {
-                // call IGS routine with week,secs and sv to retrieve sat pos
-                // vel and clkbias
-                s_SV_Info sv_info;
-                sv_info.prn = c[ch_idx].prn_num;
-                sv_info.week = system_vars.nav_GPS_week;
-                // calc sat positions at common receiver time or tx time
-                if (!system_vars.recv_time_valid)
-                  sv_info.TOW = system_vars.nav_GPS_secs;
-                else
-                  sv_info.TOW = c[ch_idx].nav.tx_time;
-                retval = GetSVInfo(&sv_info,system_vars.IGSfilename);
-                if(retval == 0)
-                {
-                  c[ch_idx].nav.sat_pos[0] = sv_info.posxyz[0];
-                  c[ch_idx].nav.sat_pos[1] = sv_info.posxyz[1];
-                  c[ch_idx].nav.sat_pos[2] = sv_info.posxyz[2];
-                  c[ch_idx].nav.clock_corr = sv_info.clk_bias;
-                  c[ch_idx].nav.sat_vel[0] = sv_info.velxyz[0];
-                  c[ch_idx].nav.sat_vel[1] = sv_info.velxyz[1];
-                  c[ch_idx].nav.sat_vel[2] = sv_info.velxyz[2];
-                  c[ch_idx].nav.clock_drift = sv_info.clk_drift;
-                  c[ch_idx].nav.valid_for_pvt = YES;
-                  system_vars.num_valid_meas++;
-                }
-              }
-              else
-              {
-                // no dice, we have to wait for the eph to be decoded in the
-                // nav data
-              }
-            }
-            // apply WAAS ionosphere correction
-            if (system_vars.Rx_State == NAV && 
-                system_vars.waas_flag == YES && 
-                c[ch_idx].nav.valid_for_pvt == YES)
-              retval = WAAS_corrections(ch_idx);
+            system_vars.Rx_State = NAV;
+            fastgps_printf("Starting Single Epoch Position Calculation.\n");
           }
-        } // end if pseudorange OK
-      }  // end of channel loop
-      // Estimate the receiver position, this assumes everything went perfect
-      // above
-      if(system_vars.num_valid_meas >= MINIMUM_PVT_SATELLITES)
+
+          fastgps_printf("Performing Single Epoch Position Calculation.\n");
+          system_vars.next_pvt_time = system_vars.process_time + system_vars.PVT_INTERVAL;
+          retval2 = SingleEpochPosition();
+
+      }
+
+      /* *********************************** */
+      /*  LeastSquares Position              */
+      /*  If we have subframe sync and TOW's */
+      /*  we can try to perform nav solution */
+      /* *********************************** */
+      if((system_vars.num_valid_tow >= 1) &&
+         (system_vars.process_time > system_vars.next_pvt_time) &&
+         (system_vars.snap_shot_flag == NO))
       {
-        retval = PVT_Solution(system_vars.num_channels);
-        if(retval == SUCCESS)
+
+          system_vars.next_pvt_time = system_vars.process_time + system_vars.PVT_INTERVAL;
+          retval2 = LeastSquaresPosition();
+
+          if(system_vars.Rx_State != NAV)
+          {
+            system_vars.Rx_State = NAV;
+            fastgps_printf("Starting Least Squares Position Calculation.\n");
+          }
+
+      }  // end of system_vars.process_time > system_vars.next_pvt_time
+
+      if(retval2 == SUCCESS){
           update_nav_log(); // update navigation logs
-        if(system_vars.Rx_State != NAV)
-        {
-          system_vars.Rx_State = NAV;
-          fastgps_printf("\nStarting Navigation Calculation.\n\n");
-        }
-      } // end  Navigation
+      }
+
     }  // end of Rx_State >= TRACKING
   }  // end of while loop
 
@@ -434,9 +401,9 @@ int read_config_file()
     return PROBLEM;
   }
   rewind(system_vars.config_file);  // make sure we are at the beginning
- 
+
  /* Read in info from file */
-  if(!system_vars.config_file) 
+  if(!system_vars.config_file)
   {
     fastgps_printf("couldn't open config file.\n");
     return PROBLEM;
@@ -488,6 +455,48 @@ int read_config_file()
           system_vars.IF = testd;
 
         }  // end if 'F'
+        if(tempc == 'I')
+        {
+          VERIFY_IO(fscanf(system_vars.config_file," %d",&testi), 1);
+          system_vars.testi = testi;
+          VERIFY_IO(fscanf(system_vars.config_file," %d",&testi), 1);
+          system_vars.snap_shot_flag = testi;
+          VERIFY_IO(fscanf(system_vars.config_file," %d",&testi), 1);
+          system_vars.doppler_pos_flag = testi;
+
+          VERIFY_IO(fscanf(system_vars.config_file," %d",&testi), 1);
+          system_vars.estimate_gpsweek = testi;
+          VERIFY_IO(fscanf(system_vars.config_file," %lf",&testd), 1);
+          system_vars.estimate_gpssecs = testd;
+
+          VERIFY_IO(fscanf(system_vars.config_file," %lf",&testd), 1);
+          system_vars.estimate_wgs84_pos[0] = testd;
+          VERIFY_IO(fscanf(system_vars.config_file," %lf",&testd), 1);
+          system_vars.estimate_wgs84_pos[1] = testd;
+          VERIFY_IO(fscanf(system_vars.config_file," %lf",&testd), 1);
+          system_vars.estimate_wgs84_pos[2] = testd;
+
+          VERIFY_IO(fscanf(system_vars.config_file," %lf",&testd), 1);
+          system_vars.PVT_INTERVAL = testd;
+          VERIFY_IO(fscanf(system_vars.config_file," %lf",&testd), 1);
+          system_vars.LOOP_TIME = testd;
+
+          system_vars.time_status = 0;
+          system_vars.position_status = 0;
+
+          if((system_vars.estimate_gpsweek != 0) &&
+             (system_vars.estimate_gpssecs != 0)){
+                system_vars.time_status = HAVE_TIME_FILE__ESTIMATE;
+             }
+
+
+          if((system_vars.estimate_wgs84_pos[0] != 0) &&
+             (system_vars.estimate_wgs84_pos[1] != 0) &&
+             (system_vars.estimate_wgs84_pos[2] != 0)){
+                system_vars.position_status = HAVE_WGS84_FILE_ESTIMATE;
+             }
+
+        }  // end if 'I'
         if(tempc == 'L') // logging flags
         {
           VERIFY_IO(fscanf(system_vars.config_file," %d",&testi), 1);

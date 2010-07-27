@@ -8,7 +8,9 @@ SRC = fastgps.cpp \
       ephemerides.cpp \
       datetime.cpp \
       intrpsp3c.cpp \
-      gnss_utils.cpp
+      gnss_utils.cpp \
+      snap_shot.cpp \
+      dopp_pos.cpp
 
 CSRC = kiss_fft.c kiss_fftr.c
 
